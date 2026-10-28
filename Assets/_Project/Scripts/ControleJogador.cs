@@ -1,4 +1,3 @@
-
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -164,6 +163,7 @@ public class ControleJogador : MonoBehaviour
         // Atualiza o estado do chão após o movimento.
         estaNoChao = character.isGrounded;
 
+        // Envia o estado atualizado do chão para o Animator
         animator.SetBool(noChaoHash, estaNoChao);
     }
 }
