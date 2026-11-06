@@ -940,7 +940,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (3)
+      value: poste_luz_enferrujado (3)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1054,7 +1054,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (24)
+      value: poste_luz_enferrujado (24)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1395,7 +1395,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (25)
+      value: poste_luz_enferrujado (25)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1976,7 +1976,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (20)
+      value: poste_luz_enferrujado (20)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2090,7 +2090,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (23)
+      value: poste_luz_enferrujado (23)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2603,7 +2603,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (22)
+      value: poste_luz_enferrujado (22)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2778,7 +2778,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (14)
+      value: poste_luz_enferrujado (14)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2835,7 +2835,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (12)
+      value: poste_luz_enferrujado (12)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3210,7 +3210,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (2)
+      value: poste_luz_enferrujado (2)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3601,7 +3601,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (9)
+      value: poste_luz_enferrujado (9)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3886,7 +3886,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (18)
+      value: poste_luz_enferrujado (18)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -3943,7 +3943,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (19)
+      value: poste_luz_enferrujado (19)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4114,7 +4114,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (15)
+      value: poste_luz_enferrujado (15)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4354,7 +4354,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (1)
+      value: poste_luz_enferrujado (1)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4468,7 +4468,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (8)
+      value: poste_luz_enferrujado (8)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4683,7 +4683,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (7)
+      value: poste_luz_enferrujado (7)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4854,7 +4854,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (6)
+      value: poste_luz_enferrujado (6)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5056,7 +5056,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (26)
+      value: poste_luz_enferrujado (26)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5174,7 +5174,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (10)
+      value: poste_luz_enferrujado (10)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5231,7 +5231,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost
+      value: poste_luz_enferrujado
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5345,7 +5345,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (13)
+      value: poste_luz_enferrujado (13)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5459,7 +5459,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (21)
+      value: poste_luz_enferrujado (21)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5520,7 +5520,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (5)
+      value: poste_luz_enferrujado (5)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5638,7 +5638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (16)
+      value: poste_luz_enferrujado (16)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -5699,7 +5699,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (17)
+      value: poste_luz_enferrujado (17)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6101,7 +6101,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (4)
+      value: poste_luz_enferrujado (4)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6336,7 +6336,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (11)
+      value: poste_luz_enferrujado (11)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -6736,7 +6736,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2184082854691780477, guid: 32444862e54a7ba4d972f8cbaac278a6, type: 3}
       propertyPath: m_Name
-      value: lamppost (27)
+      value: poste_luz_enferrujado (27)
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
