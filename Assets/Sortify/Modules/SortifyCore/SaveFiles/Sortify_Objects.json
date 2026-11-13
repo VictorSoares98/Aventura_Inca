@@ -5,6 +5,18 @@
                 {
                     "objID": "Cena_principal_CAMERA_0",
                     "colorValue": "FF0000FF"
+                },
+                {
+                    "objID": "Cena_principal_LUZ_2",
+                    "colorValue": "CC9933FF"
+                },
+                {
+                    "objID": "Cena_principal_TERRENO_5",
+                    "colorValue": "40BF40FF"
+                },
+                {
+                    "objID": "Cena_principal_PLAYER_7",
+                    "colorValue": "8000FFFF"
                 }
             ],
             "styles": [
@@ -15,6 +27,18 @@
                 {
                     "objID": "Cena_principal_CAMERA_0",
                     "styleType": 1
+                },
+                {
+                    "objID": "Cena_principal_LUZ_2",
+                    "styleType": 1
+                },
+                {
+                    "objID": "Cena_principal_TERRENO_5",
+                    "styleType": 1
+                },
+                {
+                    "objID": "Cena_principal_PLAYER_7",
+                    "styleType": 1
                 }
             ],
             "showComponents": [
@@ -24,6 +48,18 @@
                 },
                 {
                     "objID": "Cena_principal_CAMERA_0",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_LUZ_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_TERRENO_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_PLAYER_7",
                     "show": false
                 }
             ],
