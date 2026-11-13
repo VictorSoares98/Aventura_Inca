@@ -16,7 +16,7 @@
                 },
                 {
                     "objID": "Cena_principal_PLAYER_7",
-                    "colorValue": "4CB5FFFF"
+                    "colorValue": "8000FFFF"
                 }
             ],
             "styles": [
@@ -56,6 +56,10 @@
                 },
                 {
                     "objID": "Cena_principal_TERRENO_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_PLAYER_7",
                     "show": false
                 }
             ],

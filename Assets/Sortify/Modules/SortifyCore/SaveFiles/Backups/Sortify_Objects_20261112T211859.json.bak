@@ -15,8 +15,12 @@
                     "colorValue": "40BF40FF"
                 },
                 {
-                    "objID": "Cena_principal_PLAYER_7",
-                    "colorValue": "262626FF"
+                    "objID": "Cena_principal_PLAYER_8",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_principal_POSTE DE LUZ_12",
+                    "colorValue": "4CB5FFFF"
                 }
             ],
             "styles": [
@@ -37,7 +41,7 @@
                     "styleType": 1
                 },
                 {
-                    "objID": "Cena_principal_PLAYER_7",
+                    "objID": "Cena_principal_PLAYER_8",
                     "styleType": 1
                 }
             ],
@@ -56,6 +60,10 @@
                 },
                 {
                     "objID": "Cena_principal_TERRENO_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_PLAYER_8",
                     "show": false
                 }
             ],
