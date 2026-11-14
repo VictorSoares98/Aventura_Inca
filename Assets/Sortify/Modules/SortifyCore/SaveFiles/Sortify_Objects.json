@@ -65,6 +65,10 @@
                 {
                     "objID": "Cena_principal_PLAYER_8",
                     "show": false
+                },
+                {
+                    "objID": "Cena_principal_POSTE DE LUZ_12",
+                    "show": false
                 }
             ],
             "sceneName": "Cena_principal"
