@@ -1,0 +1,20 @@
+{
+    "objectsData": [
+        {
+            "colors": [
+                {
+                    "objID": "Cena_principal_POSTE DE LUZ_13",
+                    "colorValue": "40BF40FF"
+                }
+            ],
+            "styles": [
+                {
+                    "objID": "Cena_principal_POSTE DE LUZ_13",
+                    "styleType": 0
+                }
+            ],
+            "showComponents": [],
+            "sceneName": "Cena_principal"
+        }
+    ]
+}
