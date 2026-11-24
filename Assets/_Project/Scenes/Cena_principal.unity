@@ -300,7 +300,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1883264383020306885, guid: e266d6ed9b3709f41b0949f2a74df43d, type: 3}
       propertyPath: m_Name
-      value: RoadSign_Polygon
+      value: placa_pare
       objectReference: {fileID: 0}
     - target: {fileID: 8492790690523238427, guid: e266d6ed9b3709f41b0949f2a74df43d, type: 3}
       propertyPath: m_LocalPosition.x
@@ -357,7 +357,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBump (2)
+      value: quebra_mola (2)
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3169,7 +3169,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBump (3)
+      value: quebra_mola (3)
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5048,7 +5048,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBump (1)
+      value: quebra_mola (1)
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -5717,7 +5717,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBump
+      value: quebra_mola
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalPosition.x
@@ -6276,7 +6276,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBumpf
+      value: quebra_mola (5)
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalScale.x
@@ -8025,7 +8025,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2721539921338401438, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_Name
-      value: SpeedBump (4)
+      value: quebra_mola (4)
       objectReference: {fileID: 0}
     - target: {fileID: 9131750480195312547, guid: c9799bbb50f6705419ab2d945e1afa5e, type: 3}
       propertyPath: m_LocalPosition.x
