@@ -10,10 +10,15 @@
             "styles": [
                 {
                     "objID": "Cena_principal_POSTE DE LUZ_13",
-                    "styleType": 1
+                    "styleType": 0
                 }
             ],
-            "showComponents": [],
+            "showComponents": [
+                {
+                    "objID": "Cena_principal_POSTE DE LUZ_13",
+                    "show": false
+                }
+            ],
             "sceneName": "Cena_principal"
         }
     ]
