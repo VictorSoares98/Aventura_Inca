@@ -5972,7 +5972,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2716691990832002440, guid: f87a936f2f92fd543827777a716c6a2b, type: 3}
       propertyPath: m_Name
-      value: kiosk_dmg
+      value: quiosque
       objectReference: {fileID: 0}
     - target: {fileID: 2716691990832425384, guid: f87a936f2f92fd543827777a716c6a2b, type: 3}
       propertyPath: m_LocalPosition.x
