@@ -35,6 +35,9 @@ public class ControleJogador : MonoBehaviour
     [Header("Suavização da Animação")]
     [SerializeField] private float amortecimentoAnimacao = 0.15f;
 
+    [Header("Física e Interação")]
+    [SerializeField] private float forcaEmpurrao = 2.5f;
+
     private float velocidadeAtual;
     private float velocidadeY;
     private bool estaNoChao;
@@ -145,5 +148,24 @@ public class ControleJogador : MonoBehaviour
         // Atualiza o estado do chão após a movimentação física
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        Rigidbody corpoRigido = hit.collider.attachedRigidbody;
+
+        // Se o objeto atingido não possui Rigidbody ou é cinemático, ignorar
+        if (corpoRigido == null || corpoRigido.isKinematic)
+            return;
+
+        // Evita empurrar o chão ou superfícies abaixo dos pés
+        if (hit.moveDirection.y < -0.3f)
+            return;
+
+        // Calcula a direção horizontal do empurrão
+        Vector3 direcaoEmpurrao = new Vector3(hit.moveDirection.x, 0f, hit.moveDirection.z);
+
+        // Aplica o empurrão proporcional à força configurada
+        corpoRigido.AddForce(direcaoEmpurrao * forcaEmpurrao, ForceMode.Impulse);
     }
 }
