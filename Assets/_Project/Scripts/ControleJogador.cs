@@ -19,6 +19,9 @@ public class ControleJogador : MonoBehaviour
     private readonly int correndoHash =
         Animator.StringToHash("Correndo");
 
+    [SerializeField] private AudioSource passosAudioSource;
+   [SerializeField] private AudioClip[] passosAudioClips;
+
     [Header("Movimento")]
     [SerializeField] private float velocidade = 3.0f;
     [SerializeField] private float velocidadeRotacao = 15.0f;
@@ -146,4 +149,16 @@ public class ControleJogador : MonoBehaviour
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
     }
+
+    private void Passos()
+{
+    if (!estaNoChao || velocidadeAtual < 0.2f) return;
+
+    if (passosAudioSource != null && passosAudioClips != null && passosAudioClips.Length > 0)
+    {
+        int index = Random.Range(0, passosAudioClips.Length);
+        AudioClip clip = passosAudioClips[index];
+        passosAudioSource.PlayOneShot(clip);
+    }
+}
 }
