@@ -41,6 +41,10 @@
                 {
                     "objID": "Cena_principal__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_principal_HUD_4",
+                    "colorValue": "BF4040FF"
                 }
             ],
             "styles": [],

@@ -37,6 +37,10 @@
                 {
                     "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_principal__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
                 }
             ],
             "styles": [],
@@ -75,6 +79,10 @@
                 },
                 {
                     "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
                     "show": false
                 }
             ],
