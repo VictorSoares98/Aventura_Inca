@@ -1,0 +1,20 @@
+{
+    "objectsData": [
+        {
+            "colors": [
+                {
+                    "objID": "Cena_principal_CAMERA_0",
+                    "colorValue": "BF4040FF"
+                }
+            ],
+            "styles": [],
+            "showComponents": [
+                {
+                    "objID": "Cena_principal_CAMERA_0",
+                    "show": false
+                }
+            ],
+            "sceneName": "Cena_principal"
+        }
+    ]
+}
