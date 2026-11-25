@@ -2009,6 +2009,7 @@ MonoBehaviour:
   alturaPulo: 1.2
   gravidade: -9.81
   amortecimentoAnimacao: 0.15
+  forcaEmpurrao: 2.5
 --- !u!95 &410827841
 Animator:
   serializedVersion: 7
@@ -4224,6 +4225,10 @@ PrefabInstance:
     - target: {fileID: 2239634083302635949, guid: 624b5e255b575a644b7d8dbdce332b49, type: 3}
       propertyPath: m_Name
       value: estacao_gas
+      objectReference: {fileID: 0}
+    - target: {fileID: 2239634083308918541, guid: 624b5e255b575a644b7d8dbdce332b49, type: 3}
+      propertyPath: m_ProvidesContacts
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
