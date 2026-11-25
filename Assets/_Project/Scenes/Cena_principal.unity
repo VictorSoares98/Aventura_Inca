@@ -3404,7 +3404,7 @@ GameObject:
   m_Component:
   - component: {fileID: 796883141}
   m_Layer: 0
-  m_Name: Road Network
+  m_Name: _ESTRADA
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4764,7 +4764,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1178484721}
   m_Layer: 0
-  m_Name: Road Objects
+  m_Name: Objetos_Estrada
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5676,7 +5676,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1423703754}
   m_Layer: 0
-  m_Name: Connection Objects
+  m_Name: Conexoes_Estrada
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
