@@ -2139,8 +2139,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ControleJogador
   passosAudioSource: {fileID: 141013414}
   passosAudioClips:
-  - {fileID: 8300000, guid: 15ff437831d076148934ab5c5f204ac4, type: 3}
-  - {fileID: 8300000, guid: dc6b86e9bdcba814bb3079f70d898f39, type: 3}
+  - {fileID: 8300000, guid: a2bc95225e4eb29499e2b99ce1167546, type: 3}
   velocidade: 3
   velocidadeRotacao: 15
   aceleracao: 10
