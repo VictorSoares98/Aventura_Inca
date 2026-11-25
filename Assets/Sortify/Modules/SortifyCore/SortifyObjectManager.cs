@@ -238,6 +238,55 @@ namespace Sortify
             var currentSceneData = new CustomObjectData(colorsData, stylesData, showComponentsData, currentSceneName);
             var loadedData = SortifyFileManager.LoadFromFile<ObjectsDataSerializer>(OBJECTS_FILE_NAME) ?? new ObjectsDataSerializer();
             loadedData.objectsData ??= new List<CustomObjectData>();
+
+            // Preservação multi-branch: mantém itens que pertencem a outra branch ou que não estão carregados no momento
+            var existingSceneData = loadedData.objectsData.FirstOrDefault(data => data.sceneName == currentSceneName);
+            if (existingSceneData != null)
+            {
+                if (existingSceneData.colors != null)
+                {
+                    foreach (var oldColor in existingSceneData.colors)
+                    {
+                        if (!colorsData.Any(c => c.objID == oldColor.objID))
+                        {
+                            // Preserva apenas se o objeto não existe na cena aberta atualmente (pertence a outra branch/estado)
+                            if (SortifyHelper.FindObjectByID(oldColor.objID) == null)
+                            {
+                                colorsData.Add(oldColor);
+                            }
+                        }
+                    }
+                }
+
+                if (existingSceneData.styles != null)
+                {
+                    foreach (var oldStyle in existingSceneData.styles)
+                    {
+                        if (!stylesData.Any(s => s.objID == oldStyle.objID))
+                        {
+                            if (SortifyHelper.FindObjectByID(oldStyle.objID) == null)
+                            {
+                                stylesData.Add(oldStyle);
+                            }
+                        }
+                    }
+                }
+
+                if (existingSceneData.showComponents != null)
+                {
+                    foreach (var oldComp in existingSceneData.showComponents)
+                    {
+                        if (!showComponentsData.Any(sc => sc.objID == oldComp.objID))
+                        {
+                            if (SortifyHelper.FindObjectByID(oldComp.objID) == null)
+                            {
+                                showComponentsData.Add(oldComp);
+                            }
+                        }
+                    }
+                }
+            }
+
             loadedData.objectsData.RemoveAll(data => data.sceneName == currentSceneName);
             loadedData.objectsData.Add(currentSceneData);
             SortifyFileManager.SaveToFile(OBJECTS_FILE_NAME, loadedData);
