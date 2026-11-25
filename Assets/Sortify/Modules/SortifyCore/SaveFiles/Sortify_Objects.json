@@ -3,79 +3,14 @@
         {
             "colors": [
                 {
-                    "objID": "Cena_principal_POSTE DE LUZ_2_TERRENO_2",
-                    "colorValue": "40BF40FF"
-                },
-                {
-                    "objID": "Cena_principal__GRADE_19",
-                    "colorValue": "8000FFFF"
-                },
-                {
                     "objID": "Cena_principal_CAMERA_0",
                     "colorValue": "BF4040FF"
-                },
-                {
-                    "objID": "Cena_principal_LUZ_1",
-                    "colorValue": "BFBF40FF"
-                },
-                {
-                    "objID": "Cena_principal_TERRENO_2",
-                    "colorValue": "008080FF"
-                },
-                {
-                    "objID": "Cena_principal_PLAYER_3",
-                    "colorValue": "4CB5FFFF"
-                },
-                {
-                    "objID": "Cena_principal__QUEBRA MOLA_14",
-                    "colorValue": "8080CCFF"
                 }
             ],
-            "styles": [
-                {
-                    "objID": "Cena_principal_POSTE DE LUZ_2_TERRENO_2",
-                    "styleType": 0
-                }
-            ],
+            "styles": [],
             "showComponents": [
                 {
-                    "objID": "Cena_principal_POSTE DE LUZ_2_TERRENO_2",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_LUZ_1",
-                    "show": false
-                },
-                {
                     "objID": "Cena_principal_CAMERA_0",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_TERRENO_2",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_Main Camera_0_CAMERA_0",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_Directional Light_0_LUZ_1",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_Global Volume_1_LUZ_1",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_Terreno_0_TERRENO_2",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal_Terreno_Plano_1_TERRENO_2",
-                    "show": false
-                },
-                {
-                    "objID": "Cena_principal__QUEBRA MOLA_14",
                     "show": false
                 }
             ],
