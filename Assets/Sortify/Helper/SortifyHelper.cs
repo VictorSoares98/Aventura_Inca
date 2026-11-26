@@ -23,10 +23,46 @@ namespace Sortify
 
         public static GameObject FindObjectByID(string objID)
         {
+            if (string.IsNullOrEmpty(objID))
+                return null;
+
             var activeScene = SceneManager.GetActiveScene();
+            if (!activeScene.isLoaded)
+                return null;
+
+            // 1. Busca exata pela hierarquia completa
             foreach (GameObject rootObj in activeScene.GetRootGameObjects())
             {
                 GameObject foundObj = SearchInChildren(rootObj, objID);
+                if (foundObj != null)
+                    return foundObj;
+            }
+
+            // 2. Busca resiliente (Fallback): caso a ordem de irmãos ou o agrupamento de pais
+            // tenha mudado entre branches, localiza o objeto pelo nome na cena
+            string scenePrefix = activeScene.name + "_";
+            if (objID.StartsWith(scenePrefix))
+            {
+                string remaining = objID.Substring(scenePrefix.Length);
+                foreach (GameObject rootObj in activeScene.GetRootGameObjects())
+                {
+                    GameObject foundObj = FindByNameFallback(rootObj, remaining);
+                    if (foundObj != null)
+                        return foundObj;
+                }
+            }
+
+            return null;
+        }
+
+        private static GameObject FindByNameFallback(GameObject current, string remaining)
+        {
+            if (remaining.StartsWith(current.name + "_") || remaining == current.name)
+                return current;
+
+            foreach (Transform child in current.transform)
+            {
+                GameObject foundObj = FindByNameFallback(child.gameObject, remaining);
                 if (foundObj != null)
                     return foundObj;
             }

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1770938260329941325}
   - component: {fileID: 4921189275808403793}
   - component: {fileID: 83947059000195961}
+  - component: {fileID: 7851902417639102835}
   m_Layer: 0
   m_Name: TrafficCone
   m_TagString: Untagged
@@ -109,3 +110,30 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.14310029, y: 0.7483919, z: 0.15442228}
   m_Center: {x: 0.0019699, y: 0.37419572, z: 0.0043562055}
+--- !u!54 &7851902417639102835
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4908254231211520169}
+  serializedVersion: 5
+  m_Mass: 1.5
+  m_LinearDamping: 0.2
+  m_AngularDamping: 0.8
+  m_CenterOfMass: {x: 0, y: 0.1, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 0

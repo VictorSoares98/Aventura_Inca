@@ -107,3 +107,8 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Sortify auto-generated backup files
+Assets/Sortify/**/Backups/
+*.json.bak
+*.json.bak.meta
