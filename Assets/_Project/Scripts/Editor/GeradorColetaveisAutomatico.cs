@@ -598,6 +598,29 @@ public static class GeradorColetaveisAutomatico
         Object.DestroyImmediate(slotObj);
     }
 
+    [MenuItem("Aventura Inca/3. Elevar Coletáveis Acima do Solo (Corrigir Afundamento)", false, 3)]
+    public static void ElevarColetaveisNaCena()
+    {
+        ItemColetavel[] coletaveis = Object.FindObjectsByType<ItemColetavel>(FindObjectsSortMode.None);
+        int cont = 0;
+        foreach (ItemColetavel col in coletaveis)
+        {
+            col.AjustarAlturaAoTerreno();
+            EditorUtility.SetDirty(col.gameObject);
+            cont++;
+        }
+
+        if (cont > 0)
+        {
+            EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+            EditorUtility.DisplayDialog("Ajuste Concluído", $"{cont} coletáveis na cena foram elevados e agora flutuam perfeitamente sobre o solo!", "OK");
+        }
+        else
+        {
+            EditorUtility.DisplayDialog("Aviso", "Nenhum coletável foi encontrado na cena atual.", "OK");
+        }
+    }
+
     private static void ConfigurarJogadorECena(GameObject prefabMoeda, GameObject prefabReliquia, GameObject prefabPocao)
     {
         GameObject jogador = GameObject.Find("Ch18_nonPBR");
@@ -616,15 +639,31 @@ public static class GeradorColetaveisAutomatico
             Vector3 direita = jogador.transform.right;
             Vector3 posJogador = jogador.transform.position;
 
-            InstanciarAmostra(prefabMoeda, posJogador + frente * 3.5f + Vector3.up * 0.5f);
-            InstanciarAmostra(prefabReliquia, posJogador + frente * 6f + direita * 1.8f + Vector3.up * 0.5f);
-            InstanciarAmostra(prefabPocao, posJogador + frente * 6f - direita * 1.8f + Vector3.up * 0.5f);
+            InstanciarAmostra(prefabMoeda, posJogador + frente * 3.5f);
+            InstanciarAmostra(prefabReliquia, posJogador + frente * 6f + direita * 1.8f);
+            InstanciarAmostra(prefabPocao, posJogador + frente * 6f - direita * 1.8f);
         }
     }
 
     private static void InstanciarAmostra(GameObject prefab, Vector3 posicao)
     {
         if (prefab == null) return;
+
+        Vector3 origemRaio = new Vector3(posicao.x, posicao.y + 15f, posicao.z);
+        if (Physics.Raycast(origemRaio, Vector3.down, out RaycastHit hit, 40f))
+        {
+            posicao = new Vector3(posicao.x, hit.point.y + 0.85f, posicao.z);
+        }
+        else if (Terrain.activeTerrain != null)
+        {
+            float y = Terrain.activeTerrain.SampleHeight(posicao) + Terrain.activeTerrain.transform.position.y;
+            posicao = new Vector3(posicao.x, y + 0.85f, posicao.z);
+        }
+        else
+        {
+            posicao = new Vector3(posicao.x, posicao.y + 0.85f, posicao.z);
+        }
+
         GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
         if (instancia != null)
         {

@@ -26,6 +26,11 @@ public class ItemColetavel : MonoBehaviour
     [SerializeField] private float amplitudeFlutuacao = 0.15f;
     [SerializeField] private float frequenciaFlutuacao = 1.5f;
 
+    [Header("Ajuste de Altura")]
+    [Tooltip("Ajusta automaticamente a altura para flutuar acima do solo ou terreno.")]
+    [SerializeField] private bool autoAjustarAoSolo = true;
+    [SerializeField, Min(0.2f)] private float alturaAcimaDoSolo = 0.85f;
+
     [Header("Feedback (opcional)")]
     [SerializeField] private AudioClip somColeta;
     [SerializeField] private GameObject efeitoColeta;
@@ -62,6 +67,41 @@ public class ItemColetavel : MonoBehaviour
 
         if (!GetComponent<Collider>().isTrigger)
             Debug.LogWarning($"[ItemColetavel] Collider on '{name}' is not a trigger; collection will not fire.", this);
+    }
+
+    private void Start()
+    {
+        if (autoAjustarAoSolo)
+        {
+            AjustarAlturaAoTerreno();
+        }
+    }
+
+    public void AjustarAlturaAoTerreno()
+    {
+        float alturaChao = transform.position.y;
+        bool chaoDetectado = false;
+
+        // Cast ray downwards from 15m above to detect ground or terrain
+        Vector3 origem = new Vector3(transform.position.x, transform.position.y + 15f, transform.position.z);
+        int mascara = ~LayerMask.GetMask("Ignore Raycast");
+
+        if (Physics.Raycast(origem, Vector3.down, out RaycastHit hit, 40f, mascara, QueryTriggerInteraction.Ignore))
+        {
+            alturaChao = hit.point.y;
+            chaoDetectado = true;
+        }
+        else if (Terrain.activeTerrain != null)
+        {
+            alturaChao = Terrain.activeTerrain.SampleHeight(transform.position) + Terrain.activeTerrain.transform.position.y;
+            chaoDetectado = true;
+        }
+
+        if (chaoDetectado)
+        {
+            posicaoInicial = new Vector3(transform.position.x, alturaChao + alturaAcimaDoSolo, transform.position.z);
+            transform.position = posicaoInicial;
+        }
     }
 
     private void Update()
