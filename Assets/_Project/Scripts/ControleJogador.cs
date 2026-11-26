@@ -1,3 +1,4 @@
+
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
@@ -18,6 +19,10 @@ public class ControleJogador : MonoBehaviour
 
     private readonly int correndoHash =
         Animator.StringToHash("Correndo");
+
+    [Header("Áudio dos Passos")]
+    [SerializeField] private AudioSource passosAudioSource;
+    [SerializeField] private AudioClip[] passosAudioClips;
 
     [Header("Movimento")]
     [SerializeField] private float velocidade = 3.0f;
@@ -67,6 +72,7 @@ public class ControleJogador : MonoBehaviour
         float vertical = Input.GetAxisRaw("Vertical");
 
         Vector2 inputDirecional = new Vector2(horizontal, vertical);
+
         if (inputDirecional.sqrMagnitude > 1f)
         {
             inputDirecional.Normalize();
@@ -93,10 +99,11 @@ public class ControleJogador : MonoBehaviour
         frenteCamera.Normalize();
         direitaCamera.Normalize();
 
-        // Calcula a direção do movimento baseada nos inputs normalizados
-        Vector3 direcaoMovimento = frenteCamera * inputDirecional.y + direitaCamera * inputDirecional.x;
+        Vector3 direcaoMovimento =
+            frenteCamera * inputDirecional.y +
+            direitaCamera * inputDirecional.x;
 
-        // Orienta o personagem conforme a câmera
+        // Rotação do personagem
         if (frenteCamera.sqrMagnitude > 0.001f)
         {
             Quaternion rotacaoAlvo = Quaternion.LookRotation(frenteCamera);
@@ -116,56 +123,107 @@ public class ControleJogador : MonoBehaviour
             velocidadeY = -2f;
         }
 
-        // Pulo com disparo imediato da animação
+        // Pulo
         if (Input.GetButtonDown("Jump") && estaNoChao)
         {
             velocidadeY = Mathf.Sqrt(alturaPulo * -2f * gravidade);
+
             estaNoChao = false;
             animator.SetBool(noChaoHash, false);
         }
 
-        // Aplica a gravidade
+        // Gravidade
         velocidadeY += gravidade * Time.deltaTime;
 
-        // Detecta corrida: requer deslocamento para frente
+        // Corrida
         bool temMovimento = inputDirecional.sqrMagnitude > 0.01f;
-        bool correndo = Input.GetKey(KeyCode.LeftShift) && temMovimento && inputDirecional.y > 0.1f;
 
-        // Interpolação suave da velocidade física (elimina o efeito de deslizar os pés / foot sliding)
-        float velocidadeAlvo = correndo ? velocidadeCorrida : (temMovimento ? velocidade : 0f);
-        velocidadeAtual = Mathf.MoveTowards(velocidadeAtual, velocidadeAlvo, aceleracao * Time.deltaTime);
+        bool correndo =
+            Input.GetKey(KeyCode.LeftShift) &&
+            temMovimento &&
+            inputDirecional.y > 0.1f;
 
-        // Atualiza o Animator com amortecimento (damp) consistente
+        float velocidadeAlvo = correndo
+            ? velocidadeCorrida
+            : (temMovimento ? velocidade : 0f);
+
+        velocidadeAtual = Mathf.MoveTowards(
+            velocidadeAtual,
+            velocidadeAlvo,
+            aceleracao * Time.deltaTime
+        );
+
+        // Atualização das animações
         animator.SetBool(correndoHash, correndo);
-        animator.SetFloat(inputXHash, inputDirecional.x, amortecimentoAnimacao, Time.deltaTime);
-        animator.SetFloat(inputYHash, inputDirecional.y, amortecimentoAnimacao, Time.deltaTime);
 
-        // Combina movimento horizontal e vertical
-        Vector3 movimentoFinal = direcaoMovimento * velocidadeAtual + Vector3.up * velocidadeY;
+        animator.SetFloat(
+            inputXHash,
+            inputDirecional.x,
+            amortecimentoAnimacao,
+            Time.deltaTime
+        );
+
+        animator.SetFloat(
+            inputYHash,
+            inputDirecional.y,
+            amortecimentoAnimacao,
+            Time.deltaTime
+        );
+
+        // Movimento físico
+        Vector3 movimentoFinal =
+            direcaoMovimento * velocidadeAtual +
+            Vector3.up * velocidadeY;
 
         character.Move(movimentoFinal * Time.deltaTime);
 
-        // Atualiza o estado do chão após a movimentação física
+        // Atualiza estado do chão
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
     }
 
+    // Áudio dos passos
+    private void Passos()
+    {
+        if (!estaNoChao || velocidadeAtual < 0.2f)
+            return;
+
+        if (passosAudioSource != null &&
+            passosAudioClips != null &&
+            passosAudioClips.Length > 0)
+        {
+            int index = Random.Range(0, passosAudioClips.Length);
+
+            AudioClip clip = passosAudioClips[index];
+
+            if (clip != null)
+            {
+                passosAudioSource.PlayOneShot(clip);
+            }
+        }
+    }
+
+    // Interação física com objetos
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody corpoRigido = hit.collider.attachedRigidbody;
 
-        // Se o objeto atingido não possui Rigidbody ou é cinemático, ignorar
         if (corpoRigido == null || corpoRigido.isKinematic)
             return;
 
-        // Evita empurrar o chão ou superfícies abaixo dos pés
+        // Evita empurrar o chão
         if (hit.moveDirection.y < -0.3f)
             return;
 
-        // Calcula a direção horizontal do empurrão
-        Vector3 direcaoEmpurrao = new Vector3(hit.moveDirection.x, 0f, hit.moveDirection.z);
+        Vector3 direcaoEmpurrao = new Vector3(
+            hit.moveDirection.x,
+            0f,
+            hit.moveDirection.z
+        );
 
-        // Aplica o empurrão proporcional à força configurada
-        corpoRigido.AddForce(direcaoEmpurrao * forcaEmpurrao, ForceMode.Impulse);
+        corpoRigido.AddForce(
+            direcaoEmpurrao * forcaEmpurrao,
+            ForceMode.Impulse
+        );
     }
 }

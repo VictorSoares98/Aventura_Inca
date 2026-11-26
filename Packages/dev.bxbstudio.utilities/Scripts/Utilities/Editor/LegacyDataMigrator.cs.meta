@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 5323977474d543cea25321f1779bdf1a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 304216
+  packageName: 'Multiversal Vehicle Controller: Community - Car Physics Controller'
+  packageVersion: 1.5.3
+  assetPath: Packages/dev.bxbstudio.utilities/Scripts/Utilities/Editor/LegacyDataMigrator.cs
+  uploadId: 1035398
