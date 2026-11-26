@@ -135,5 +135,7 @@ MonoBehaviour:
   velocidadeGiro: 90
   amplitudeFlutuacao: 0.15
   frequenciaFlutuacao: 1.5
+  autoAjustarAoSolo: 1
+  alturaAcimaDoSolo: 0.85
   somColeta: {fileID: 0}
   efeitoColeta: {fileID: 0}

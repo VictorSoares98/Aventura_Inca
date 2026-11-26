@@ -68,17 +68,17 @@ public class HUDInventario : MonoBehaviour
     private void AtualizarContadores()
     {
         if (textoMoedas != null)
-            textoMoedas.text = inventario.ContarPorTipo(TipoItem.Moeda).ToString();
+            textoMoedas.text = $"Moedas: {inventario.ContarPorTipo(TipoItem.Moeda)}";
 
         // Without an objective, show the raw relic count
         if (objetivo == null && textoReliquias != null)
-            textoReliquias.text = inventario.ContarPorTipo(TipoItem.Reliquia).ToString();
+            textoReliquias.text = $"Relíquias: {inventario.ContarPorTipo(TipoItem.Reliquia)}";
     }
 
     private void AtualizarReliquias(int coletadas, int meta)
     {
         if (textoReliquias != null)
-            textoReliquias.text = $"{coletadas}/{meta}";
+            textoReliquias.text = $"Relíquias: {coletadas}/{meta}";
     }
 
     private void MostrarAviso(ItemColetavel coletavel)
