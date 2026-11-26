@@ -38,6 +38,9 @@ public class ControleJogador : MonoBehaviour
     [Header("Suavização da Animação")]
     [SerializeField] private float amortecimentoAnimacao = 0.15f;
 
+    [Header("Física e Interação")]
+    [SerializeField] private float forcaEmpurrao = 2.5f;
+
     private float velocidadeAtual;
     private float velocidadeY;
     private bool estaNoChao;
