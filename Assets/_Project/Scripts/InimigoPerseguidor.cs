@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -21,6 +22,12 @@ public class InimigoPerseguidor : MonoBehaviour
     [SerializeField] private float velocidadeCaminhada = 2.5f;
     [SerializeField] private float velocidadeCorrida = 5.0f;
 
+    [Header("Tempo e Reação")]
+    [Tooltip("Tempo de espera ocioso inicial ao iniciar o jogo (permite ao jogador andar e se posicionar).")]
+    [SerializeField] private float tempoEsperaInicial = 3.5f;
+    [Tooltip("Tempo de preparação do ataque (windup) permitindo ao jogador ver o golpe e tentar desviar.")]
+    [SerializeField] private float tempoPreparoAtaque = 0.7f;
+
     [Header("Combate Letal")]
     [Tooltip("Distância máxima para aplicar o ataque fatal no jogador.")]
     [SerializeField] private float distanciaAtaque = 2.2f;
@@ -29,6 +36,9 @@ public class InimigoPerseguidor : MonoBehaviour
 
     private NavMeshAgent agente;
     private bool jaAtacou;
+    private bool preparandoAtaque;
+    private float cronometroEspera;
+    private float cronometroAtaque;
     private string animacaoAtual;
 
     private void Awake()
@@ -39,6 +49,17 @@ public class InimigoPerseguidor : MonoBehaviour
             animator = GetComponentInChildren<Animator>();
 
         GarantirColisorTrigger();
+        cronometroEspera = tempoEsperaInicial;
+    }
+
+    private void OnEnable()
+    {
+        VidaPersonagem.AoJogadorRenascer += AoRenascerJogador;
+    }
+
+    private void OnDisable()
+    {
+        VidaPersonagem.AoJogadorRenascer -= AoRenascerJogador;
     }
 
     private void Start()
@@ -81,6 +102,14 @@ public class InimigoPerseguidor : MonoBehaviour
         }
     }
 
+    private void AoRenascerJogador()
+    {
+        jaAtacou = false;
+        preparandoAtaque = false;
+        cronometroEspera = 2.5f; // Dá 2.5s de trégua ao renascer
+        TocarAnimacao(animacaoIdle, 0.2f);
+    }
+
     private void Update()
     {
         if (jogador == null)
@@ -92,20 +121,48 @@ public class InimigoPerseguidor : MonoBehaviour
         // Se já atacou ou o jogador morreu, para de perseguir
         if (jaAtacou || (vidaJogador != null && vidaJogador.EstaMorto))
         {
-            if (agente != null && agente.isOnNavMesh)
+            PararMovimento();
+            if (jaAtacou && !preparandoAtaque)
             {
-                agente.isStopped = true;
-                agente.velocity = Vector3.zero;
+                TocarAnimacao(animacaoIdle, 0.3f);
             }
+            return;
+        }
+
+        // Período de carência inicial para o jogador andar livremente
+        if (cronometroEspera > 0f)
+        {
+            cronometroEspera -= Time.deltaTime;
+            PararMovimento();
+            TocarAnimacao(animacaoIdle, 0.2f);
             return;
         }
 
         float distancia = Vector3.Distance(transform.position, jogador.position);
 
-        // Ataque fatal por proximidade física
+        // Se está no meio do preparo do ataque fatal
+        if (preparandoAtaque)
+        {
+            PararMovimento();
+            EncararJogador();
+
+            cronometroAtaque -= Time.deltaTime;
+            if (cronometroAtaque <= 0f)
+            {
+                preparandoAtaque = false;
+                // Aplica o dano se o jogador não tiver fugido para longe
+                if (distancia <= distanciaAtaque + 1.0f)
+                {
+                    DesferirDanoFatal();
+                }
+            }
+            return;
+        }
+
+        // Início do ataque fatal por proximidade física
         if (distancia <= distanciaAtaque)
         {
-            ExecutarAtaqueFatal();
+            IniciarPreparoAtaque();
             return;
         }
 
@@ -143,47 +200,46 @@ public class InimigoPerseguidor : MonoBehaviour
         else
         {
             // Ocioso fora de alcance
-            if (agente != null && agente.isOnNavMesh)
-            {
-                agente.isStopped = true;
-            }
-
+            PararMovimento();
             TocarAnimacao(animacaoIdle, 0.3f);
         }
     }
 
-    private void OnTriggerEnter(Collider outro)
+    private void IniciarPreparoAtaque()
     {
-        if (jaAtacou) return;
+        if (jaAtacou || preparandoAtaque) return;
 
-        if (outro.CompareTag("Player") || outro.gameObject == jogador?.gameObject)
+        preparandoAtaque = true;
+        cronometroAtaque = tempoPreparoAtaque;
+
+        PararMovimento();
+        EncararJogador();
+
+        // Dispara uma das animações de ataque reais da besta (Attack1, Attack2, Attack3)
+        if (animacoesAtaque != null && animacoesAtaque.Length > 0)
         {
-            ExecutarAtaqueFatal();
+            string golpeSorteado = animacoesAtaque[Random.Range(0, animacoesAtaque.Length)];
+            TocarAnimacao(golpeSorteado, 0.1f);
         }
     }
 
-    private void OnCollisionEnter(Collision col)
-    {
-        if (jaAtacou) return;
-
-        if (col.gameObject.CompareTag("Player") || col.gameObject == jogador?.gameObject)
-        {
-            ExecutarAtaqueFatal();
-        }
-    }
-
-    private void ExecutarAtaqueFatal()
+    private void DesferirDanoFatal()
     {
         if (jaAtacou) return;
         jaAtacou = true;
 
-        if (agente != null && agente.isOnNavMesh)
-        {
-            agente.isStopped = true;
-            agente.velocity = Vector3.zero;
-        }
+        PararMovimento();
+        EncararJogador();
 
-        // Gira para encarar o jogador diretamente no momento do impacto
+        if (vidaJogador != null)
+        {
+            Debug.LogWarning("[InimigoPerseguidor] Ataque fatal desferido contra o jogador!");
+            vidaJogador.ReceberDano(matarInstantaneo ? 9999f : danoLetal);
+        }
+    }
+
+    private void EncararJogador()
+    {
         if (jogador != null)
         {
             Vector3 dir = (jogador.position - transform.position);
@@ -193,18 +249,34 @@ public class InimigoPerseguidor : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(dir);
             }
         }
+    }
 
-        // Dispara uma das animações de ataque reais da besta (Attack1, Attack2, Attack3)
-        if (animacoesAtaque != null && animacoesAtaque.Length > 0)
+    private void PararMovimento()
+    {
+        if (agente != null && agente.isOnNavMesh)
         {
-            string golpeSorteado = animacoesAtaque[Random.Range(0, animacoesAtaque.Length)];
-            TocarAnimacao(golpeSorteado, 0.1f);
+            agente.isStopped = true;
+            agente.velocity = Vector3.zero;
         }
+    }
 
-        if (vidaJogador != null)
+    private void OnTriggerEnter(Collider outro)
+    {
+        if (jaAtacou || cronometroEspera > 0f) return;
+
+        if (outro.CompareTag("Player") || outro.gameObject == jogador?.gameObject)
         {
-            Debug.Log("[InimigoPerseguidor] Ataque fatal desferido com sucesso contra o jogador!");
-            vidaJogador.ReceberDano(matarInstantaneo ? 9999f : danoLetal);
+            IniciarPreparoAtaque();
+        }
+    }
+
+    private void OnCollisionEnter(Collision col)
+    {
+        if (jaAtacou || cronometroEspera > 0f) return;
+
+        if (col.gameObject.CompareTag("Player") || col.gameObject == jogador?.gameObject)
+        {
+            IniciarPreparoAtaque();
         }
     }
 

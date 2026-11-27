@@ -61,9 +61,41 @@ public class ControleJogador : MonoBehaviour
         Cursor.visible = false;
     }
 
+    private void Start()
+    {
+        if (character == null)
+            character = GetComponent<CharacterController>();
+
+        if (character != null && !character.enabled)
+            character.enabled = true;
+    }
+
     private void Update()
     {
+        // Pressionar [R] permite reviver caso esteja morto
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            VidaPersonagem vida = GetComponent<VidaPersonagem>();
+            if (vida != null && vida.EstaMorto)
+            {
+                vida.Renascer();
+                return;
+            }
+        }
+
         ProcessarMovimento();
+    }
+
+    /// <summary>
+    /// Restaura o movimento e o CharacterController do jogador caso tenham sido desabilitados.
+    /// </summary>
+    public void ForcarAtivarMovimento()
+    {
+        enabled = true;
+        if (character == null)
+            character = GetComponent<CharacterController>();
+        if (character != null)
+            character.enabled = true;
     }
 
     private void ProcessarMovimento()

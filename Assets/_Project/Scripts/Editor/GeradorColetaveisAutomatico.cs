@@ -687,7 +687,7 @@ public static class GeradorColetaveisAutomatico
         InstanciarAmostra(prefabPocao, pos + frente * 48f - direita * 1.5f);
 
         EditorUtility.DisplayProgressBar("Aventura Inca", "Invocando inimigo letal...", 0.9f);
-        CriarInimigoLetalNaCena(pos + frente * 30f, jogador);
+        CriarInimigoLetalNaCena(pos + frente * 12f, jogador);
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
         EditorUtility.ClearProgressBar();
@@ -697,14 +697,85 @@ public static class GeradorColetaveisAutomatico
             "✔ 10 Moedas de Ouro (formando uma trilha)\n" +
             "✔ 5 Relíquias Incas (meta exata para vencer o objetivo!)\n" +
             "✔ 3 Poções de Vida distribuídas pelo trajeto\n" +
-            "✔ 1 Inimigo Letal posicionado à frente (Mata ao encostar!)\n\n" +
+            "✔ 1 Inimigo Letal posicionado 12m à sua frente (Mata ao encostar!)\n\n" +
             "Todos os itens foram automaticamente ajustados para flutuar acima do solo!\n" +
             "Dê PLAY para testar!", "Sensacional!");
 
         Debug.Log("[GeradorColetaveis] Sucesso: Coletáveis e Inimigo Letal espalhados pelo mapa.");
     }
 
-    private static void CriarInimigoLetalNaCena(Vector3 posicao, GameObject jogador)
+    [MenuItem("Aventura Inca/5. Posicionar Inimigo a Distância Equilibrada (20m)", false, 5)]
+    public static void MoverInimigoParaPertoDoPlayer()
+    {
+        GameObject jogador = GameObject.Find("Ch18_nonPBR") ?? GameObject.FindWithTag("Player");
+        if (jogador == null)
+        {
+            EditorUtility.DisplayDialog("Aviso", "Jogador não encontrado na cena.", "OK");
+            return;
+        }
+
+        Vector3 posAlvo = jogador.transform.position + jogador.transform.forward * 20f;
+        GameObject inimigo = CriarInimigoLetalNaCena(posAlvo, jogador);
+
+        Selection.activeGameObject = inimigo;
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+        EditorUtility.DisplayDialog("Inimigo Pronto!", 
+            "O Inimigo Letal (Besta Sci-Fi) foi colocado a 20 metros à frente do seu personagem na pista!\n\n" +
+            "Ele possui 3.5 segundos de espera inicial e preparação do ataque, permitindo que você ande e corra livremente.\n" +
+            "Dê PLAY para testar!", "OK");
+    }
+
+    [MenuItem("Aventura Inca/6. Destravar e Restaurar Movimento do Jogador (1 Clique)", false, 6)]
+    public static void DestravarMovimentoJogador()
+    {
+        GameObject jogador = GameObject.Find("Ch18_nonPBR") ?? GameObject.FindWithTag("Player");
+        if (jogador == null)
+        {
+            EditorUtility.DisplayDialog("Aviso", "Objeto do Jogador ('Ch18_nonPBR') não encontrado.", "OK");
+            return;
+        }
+
+        ControleJogador controle = jogador.GetComponent<ControleJogador>();
+        if (controle != null) controle.enabled = true;
+
+        CharacterController cc = jogador.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = true;
+
+        VidaPersonagem vida = jogador.GetComponent<VidaPersonagem>();
+        if (vida != null)
+        {
+            SerializedObject soVida = new SerializedObject(vida);
+            soVida.FindProperty("estaMorto").boolValue = false;
+            soVida.FindProperty("vidaAtual").floatValue = 100f;
+            soVida.ApplyModifiedProperties();
+        }
+
+        // Se o inimigo estiver muito perto do jogador (< 15m), recua para 22m
+        InimigoPerseguidor inimigo = Object.FindFirstObjectByType<InimigoPerseguidor>();
+        if (inimigo != null)
+        {
+            float dist = Vector3.Distance(jogador.transform.position, inimigo.transform.position);
+            if (dist < 15f)
+            {
+                inimigo.transform.position = jogador.transform.position + jogador.transform.forward * 22f;
+                EditorUtility.SetDirty(inimigo.gameObject);
+            }
+        }
+
+        EditorUtility.SetDirty(jogador);
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+
+        EditorUtility.DisplayDialog("Movimento Destravado com Sucesso!",
+            "✔ ControleJogador: Ativado\n" +
+            "✔ CharacterController: Ativado\n" +
+            "✔ Vida: 100/100 (Vivo)\n" +
+            "✔ Inimigo ajustado para 22m com 3.5s de carência inicial\n" +
+            "✔ Tecla [R] disponível no jogo para reviver instantaneamente caso seja atacado!\n\n" +
+            "Dê PLAY e ande normalmente com WASD!", "Perfeito!");
+    }
+
+    private static GameObject CriarInimigoLetalNaCena(Vector3 posicao, GameObject jogador)
     {
         InimigoPerseguidor existente = Object.FindFirstObjectByType<InimigoPerseguidor>();
         if (existente != null)
@@ -763,6 +834,7 @@ public static class GeradorColetaveisAutomatico
         if (seguidor == null) seguidor = inimigoObj.AddComponent<InimigoPerseguidor>();
 
         Undo.RegisterCreatedObjectUndo(inimigoObj, "Criar Inimigo Letal");
+        return inimigoObj;
     }
 
     private static void ConfigurarJogadorECena(GameObject prefabMoeda, GameObject prefabReliquia, GameObject prefabPocao)

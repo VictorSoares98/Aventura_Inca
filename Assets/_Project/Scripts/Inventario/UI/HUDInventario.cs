@@ -40,6 +40,9 @@ public class HUDInventario : MonoBehaviour
 
         ItemColetavel.AoEntrarAlcance += MostrarAviso;
         ItemColetavel.AoSairAlcance += EsconderAviso;
+
+        VidaPersonagem.AoJogadorMorrer += ExibirMorte;
+        VidaPersonagem.AoJogadorRenascer += EsconderMorte;
     }
 
     private void OnDisable()
@@ -55,6 +58,9 @@ public class HUDInventario : MonoBehaviour
 
         ItemColetavel.AoEntrarAlcance -= MostrarAviso;
         ItemColetavel.AoSairAlcance -= EsconderAviso;
+
+        VidaPersonagem.AoJogadorMorrer -= ExibirMorte;
+        VidaPersonagem.AoJogadorRenascer -= EsconderMorte;
     }
 
     private void Start()
@@ -106,6 +112,24 @@ public class HUDInventario : MonoBehaviour
 
         if (painelAviso != null)
             painelAviso.SetActive(false);
+    }
+
+    private void ExibirMorte()
+    {
+        if (textoAviso != null)
+            textoAviso.text = "<color=#FF3333><b>💀 VOCÊ FOI ELIMINADO!</b></color>\nPressione <b>[R]</b> para Renascer";
+
+        if (painelAviso != null)
+            painelAviso.SetActive(true);
+    }
+
+    private void EsconderMorte()
+    {
+        if (painelAviso != null)
+            painelAviso.SetActive(false);
+
+        if (textoAviso != null)
+            textoAviso.text = string.Empty;
     }
 
     private void MostrarNotificacao(ItemDados item, int quantidade)
