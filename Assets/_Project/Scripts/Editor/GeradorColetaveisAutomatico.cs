@@ -3,6 +3,7 @@ using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -94,7 +95,18 @@ public static class GeradorColetaveisAutomatico
             CanvasScaler scaler = canvasObj.GetComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920, 1080);
+            scaler.matchWidthOrHeight = 0.5f;
             Undo.RegisterCreatedObjectUndo(canvasObj, "Criar Canvas");
+        }
+        else
+        {
+            CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
+            if (scaler != null)
+            {
+                scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                scaler.referenceResolution = new Vector2(1920, 1080);
+                scaler.matchWidthOrHeight = 0.5f;
+            }
         }
 
         if (Object.FindFirstObjectByType<EventSystem>() == null)
@@ -132,11 +144,11 @@ public static class GeradorColetaveisAutomatico
 
         // Contador Moedas
         TextMeshProUGUI tmpMoedas = CriarOuObterTextoTMP(hudTrans, "Contador_Moedas", "Moedas: 0", 
-            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(200f, 40f), 24, Color.yellow, TextAlignmentOptions.Left);
+            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(200f, 40f), 24, Color.yellow, TextAlignmentOptions.Left, new Vector2(0f, 1f));
 
         // Contador Relíquias
         TextMeshProUGUI tmpReliquias = CriarOuObterTextoTMP(hudTrans, "Contador_Reliquias", "Relíquias: 0/5", 
-            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -80f), new Vector2(250f, 40f), 24, new Color(1f, 0.85f, 0.4f), TextAlignmentOptions.Left);
+            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -80f), new Vector2(250f, 40f), 24, new Color(1f, 0.85f, 0.4f), TextAlignmentOptions.Left, new Vector2(0f, 1f));
 
         // Notificação
         TextMeshProUGUI tmpNotif = CriarOuObterTextoTMP(hudTrans, "Texto_Notificacao", "", 
@@ -275,7 +287,7 @@ public static class GeradorColetaveisAutomatico
     }
 
     private static TextMeshProUGUI CriarOuObterTextoTMP(Transform pai, string nome, string textoInicial, 
-        Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 sizeDelta, float fontSize, Color cor, TextAlignmentOptions alinhamento)
+        Vector2 anchorMin, Vector2 anchorMax, Vector2 anchoredPos, Vector2 sizeDelta, float fontSize, Color cor, TextAlignmentOptions alinhamento, Vector2? pivot = null)
     {
         Transform t = pai.Find(nome);
         GameObject go = t != null ? t.gameObject : new GameObject(nome, typeof(RectTransform), typeof(TextMeshProUGUI));
@@ -284,6 +296,7 @@ public static class GeradorColetaveisAutomatico
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchorMin = anchorMin;
         rt.anchorMax = anchorMax;
+        rt.pivot = pivot ?? (anchorMin == anchorMax ? anchorMin : new Vector2(0.5f, 0.5f));
         rt.anchoredPosition = anchoredPos;
         if (sizeDelta != Vector2.zero) rt.sizeDelta = sizeDelta;
 
@@ -619,6 +632,137 @@ public static class GeradorColetaveisAutomatico
         {
             EditorUtility.DisplayDialog("Aviso", "Nenhum coletável foi encontrado na cena atual.", "OK");
         }
+    }
+
+    [MenuItem("Aventura Inca/4. Espalhar Coletáveis e Criar Inimigo no Mapa (1 Clique)", false, 4)]
+    public static void EspalharColetaveisEEstanciarInimigo()
+    {
+        GameObject jogador = GameObject.Find("Ch18_nonPBR") ?? GameObject.FindWithTag("Player");
+        if (jogador == null)
+        {
+            EditorUtility.DisplayDialog("Aviso", "Jogador não encontrado na cena.", "OK");
+            return;
+        }
+
+        Vector3 pos = jogador.transform.position;
+        Vector3 frente = jogador.transform.forward;
+        Vector3 direita = jogador.transform.right;
+
+        GameObject prefabMoeda = AssetDatabase.LoadAssetAtPath<GameObject>($"{PastaPrefabs}/Coletavel_Moeda.prefab");
+        GameObject prefabReliquia = AssetDatabase.LoadAssetAtPath<GameObject>($"{PastaPrefabs}/Coletavel_Reliquia.prefab");
+        GameObject prefabPocao = AssetDatabase.LoadAssetAtPath<GameObject>($"{PastaPrefabs}/Coletavel_Pocao.prefab");
+
+        if (prefabMoeda == null || prefabReliquia == null || prefabPocao == null)
+        {
+            EditorUtility.DisplayDialog("Aviso", "Prefabs não encontrados. Execute o passo 1 primeiro.", "OK");
+            return;
+        }
+
+        EditorUtility.DisplayProgressBar("Aventura Inca", "Espalhando moedas pela trilha...", 0.2f);
+        for (int i = 1; i <= 10; i++)
+        {
+            float dist = i * 4.5f;
+            float curva = Mathf.Sin(i * 0.7f) * 2.2f;
+            Vector3 spawnPos = pos + frente * dist + direita * curva;
+            InstanciarAmostra(prefabMoeda, spawnPos);
+        }
+
+        EditorUtility.DisplayProgressBar("Aventura Inca", "Espalhando as 5 relíquias incas...", 0.5f);
+        Vector3[] offsetsReliquias = new Vector3[]
+        {
+            frente * 12f + direita * 3.5f,
+            frente * 22f - direita * 3.5f,
+            frente * 32f + direita * 2.0f,
+            frente * 42f - direita * 2.5f,
+            frente * 52f
+        };
+        for (int i = 0; i < offsetsReliquias.Length; i++)
+        {
+            InstanciarAmostra(prefabReliquia, pos + offsetsReliquias[i]);
+        }
+
+        EditorUtility.DisplayProgressBar("Aventura Inca", "Distribuindo poções de cura...", 0.75f);
+        InstanciarAmostra(prefabPocao, pos + frente * 18f - direita * 1.5f);
+        InstanciarAmostra(prefabPocao, pos + frente * 36f + direita * 1.5f);
+        InstanciarAmostra(prefabPocao, pos + frente * 48f - direita * 1.5f);
+
+        EditorUtility.DisplayProgressBar("Aventura Inca", "Invocando inimigo letal...", 0.9f);
+        CriarInimigoLetalNaCena(pos + frente * 30f, jogador);
+
+        EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
+        EditorUtility.ClearProgressBar();
+
+        EditorUtility.DisplayDialog("Missão Concluída!", 
+            "Foram adicionados à fase com sucesso:\n\n" +
+            "✔ 10 Moedas de Ouro (formando uma trilha)\n" +
+            "✔ 5 Relíquias Incas (meta exata para vencer o objetivo!)\n" +
+            "✔ 3 Poções de Vida distribuídas pelo trajeto\n" +
+            "✔ 1 Inimigo Letal posicionado à frente (Mata ao encostar!)\n\n" +
+            "Todos os itens foram automaticamente ajustados para flutuar acima do solo!\n" +
+            "Dê PLAY para testar!", "Sensacional!");
+
+        Debug.Log("[GeradorColetaveis] Sucesso: Coletáveis e Inimigo Letal espalhados pelo mapa.");
+    }
+
+    private static void CriarInimigoLetalNaCena(Vector3 posicao, GameObject jogador)
+    {
+        InimigoPerseguidor existente = Object.FindFirstObjectByType<InimigoPerseguidor>();
+        if (existente != null)
+        {
+            Undo.DestroyObjectImmediate(existente.gameObject);
+        }
+
+        GameObject prefabBesta = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin1.prefab");
+        GameObject inimigoObj = null;
+
+        if (prefabBesta != null)
+        {
+            inimigoObj = (GameObject)PrefabUtility.InstantiatePrefab(prefabBesta);
+            inimigoObj.name = "Inimigo_Besta_Letal";
+        }
+        else
+        {
+            inimigoObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+            inimigoObj.name = "Inimigo_Letal";
+            inimigoObj.transform.localScale = new Vector3(1.4f, 1.8f, 1.4f);
+
+            Renderer r = inimigoObj.GetComponent<Renderer>();
+            if (r != null)
+            {
+                Material matInimigo = CriarMaterialURP("Mat_Inimigo", new Color(0.8f, 0.05f, 0.05f), 0.2f, 0.6f);
+                r.sharedMaterial = matInimigo;
+            }
+        }
+
+        Vector3 origemRaio = new Vector3(posicao.x, posicao.y + 20f, posicao.z);
+        if (Physics.Raycast(origemRaio, Vector3.down, out RaycastHit hit, 50f))
+        {
+            posicao = hit.point;
+        }
+        else if (Terrain.activeTerrain != null)
+        {
+            posicao.y = Terrain.activeTerrain.SampleHeight(posicao) + Terrain.activeTerrain.transform.position.y;
+        }
+
+        inimigoObj.transform.position = posicao;
+        Vector3 dirParaJogador = (jogador.transform.position - posicao);
+        dirParaJogador.y = 0f;
+        if (dirParaJogador.sqrMagnitude > 0.001f)
+        {
+            inimigoObj.transform.rotation = Quaternion.LookRotation(dirParaJogador);
+        }
+
+        NavMeshAgent agente = inimigoObj.GetComponent<NavMeshAgent>();
+        if (agente == null) agente = inimigoObj.AddComponent<NavMeshAgent>();
+        agente.speed = 3.5f;
+        agente.stoppingDistance = 1.2f;
+        agente.radius = 0.8f;
+        agente.height = 2.0f;
+
+        InimigoPerseguidor seguidor = inimigoObj.GetComponent<InimigoPerseguidor>();
+        if (seguidor == null) seguidor = inimigoObj.AddComponent<InimigoPerseguidor>();
+
+        Undo.RegisterCreatedObjectUndo(inimigoObj, "Criar Inimigo Letal");
     }
 
     private static void ConfigurarJogadorECena(GameObject prefabMoeda, GameObject prefabReliquia, GameObject prefabPocao)
