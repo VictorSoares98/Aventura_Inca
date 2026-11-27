@@ -91,6 +91,12 @@
                 }
             ],
             "sceneName": "Cena_principal"
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "Cena_Coletaveis_Inventario"
         }
     ]
 }
