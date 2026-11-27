@@ -125,7 +125,8 @@ public class ItemColetavel : MonoBehaviour
         if (coletado || item == null || !outro.CompareTag(tagJogador))
             return;
 
-        if (!outro.TryGetComponent(out Inventario inventario))
+        Inventario inventario = outro.GetComponent<Inventario>() ?? outro.GetComponentInParent<Inventario>();
+        if (inventario == null)
         {
             Debug.LogWarning($"[ItemColetavel] '{outro.name}' has tag '{tagJogador}' but no Inventario component.", outro);
             return;

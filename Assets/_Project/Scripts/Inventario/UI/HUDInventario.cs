@@ -73,16 +73,19 @@ public class HUDInventario : MonoBehaviour
 
     private void AtualizarContadores()
     {
-        if (textoMoedas != null && inventario != null)
-            textoMoedas.text = $"Moedas: {inventario.ContarPorTipo(TipoItem.Moeda)}";
+        if (inventario == null) return;
+
+        int totalMoedas = inventario.ContarPorTipo(TipoItem.Moeda);
+        int totalReliquias = inventario.ContarPorTipo(TipoItem.Reliquia);
+        int metaReliquias = objetivo != null ? objetivo.Meta : 5;
+
+        if (textoMoedas != null)
+            textoMoedas.text = $"Moedas: {totalMoedas}";
 
         if (textoReliquias != null)
-        {
-            if (objetivo != null)
-                textoReliquias.text = $"Relíquias: {objetivo.Coletadas}/{objetivo.Meta}";
-            else if (inventario != null)
-                textoReliquias.text = $"Relíquias: {inventario.ContarPorTipo(TipoItem.Reliquia)}";
-        }
+            textoReliquias.text = $"Relíquias: {totalReliquias}/{metaReliquias}";
+
+        Debug.Log($"[HUDInventario] HUD Atualizado em tempo real: Moedas={totalMoedas} | Relíquias={totalReliquias}/{metaReliquias}");
     }
 
     private void AtualizarReliquias(int coletadas, int meta)
