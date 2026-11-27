@@ -960,6 +960,16 @@ public static class GeradorColetaveisAutomatico
         {
             inimigoObj = (GameObject)PrefabUtility.InstantiatePrefab(prefabBesta);
             inimigoObj.name = "Inimigo_Besta_Letal";
+
+            Animator animInimigo = inimigoObj.GetComponentInChildren<Animator>();
+            if (animInimigo != null && animInimigo.avatar == null)
+            {
+                Avatar avatarBesta = AssetDatabase.LoadAssetAtPath<Avatar>("Assets/SciFi Beast06 Bull/Mesh/SciFi Beast06 Bull Skin1.fbx");
+                if (avatarBesta != null)
+                {
+                    animInimigo.avatar = avatarBesta;
+                }
+            }
         }
         else
         {

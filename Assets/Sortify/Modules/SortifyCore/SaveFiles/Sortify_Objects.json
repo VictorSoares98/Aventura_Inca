@@ -93,6 +93,12 @@
             "sceneName": "Cena_principal"
         },
         {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "SciFi Beast06 Bull"
+        },
+        {
             "colors": [
                 {
                     "objID": "Cena_Coletaveis_Inventario_CAMERA_0",
