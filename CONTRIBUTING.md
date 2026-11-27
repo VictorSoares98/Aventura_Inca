@@ -4,7 +4,25 @@ Este documento reúne os combinados da equipe para evitar conflitos de merge em 
 
 ---
 
-## 1. Fluxo de Trabalho com Cenas (`.unity`)
+## 1. Estratégia de Branches (`develop` e `main`)
+
+O repositório segue um fluxo simplificado com duas branches principais:
+
+- **`main` (Versões Estáveis e Entregas Finais):** Reservada exclusivamente para versões testadas, jogáveis e prontas para apresentação ou entrega. Recebe código apenas via Pull Request de `develop` → `main` após validação completa em Play Mode.
+- **`develop` (Integração Diária da Equipe):** Branch padrão de desenvolvimento onde todas as features e correções do time são integradas no dia a dia.
+
+### Regras para novas tarefas
+1. Crie sempre novas branches a partir de `develop` atualizada:
+   ```powershell
+   git fetch origin
+   git checkout -b feat/nome-da-feature origin/develop
+   ```
+2. Abra os Pull Requests do dia a dia apontando para **`develop`** (nunca direto para `main`).
+3. Antes de iniciar o trabalho, sincronize sua branch com a `develop` (`git fetch origin` e `git merge origin/develop`).
+
+---
+
+## 2. Fluxo de Trabalho com Cenas (`.unity`)
 
 Arquivos `.unity` são serializados em YAML com `fileID`s numéricos locais. Quando duas pessoas editam a mesma cena em branches diferentes, o Unity gera `fileID`s iguais para objetos distintos, causando conflitos difíceis e perigosos no Git.
 
@@ -12,17 +30,17 @@ Arquivos `.unity` são serializados em YAML com `fileID`s numéricos locais. Qua
 - **Use cenas isoladas por feature:** Para desenvolver e testar novas mecânicas sem travar o restante do time, trabalhe em uma cena dedicada (ex.: `Assets/_Project/Scenes/Cena_Coletaveis_Inventario.unity`).
   - Se o Unity perguntar ao trocar de cena se deseja salvar alterações em `Cena_principal.unity` que não eram intencionais, selecione **Don't Save**.
 - **Prefira Prefabs e Scripts:** Sempre que possível, encapsule sistemas (Inimigo, HUD, Inventário, Armadilhas, Coletáveis) em **Prefabs** (`Assets/_Project/Prefabs/`) e **Scripts** (`Assets/_Project/Scripts/`).
-- **Integração final controlada:** Ao concluir as features na `main`, apenas um integrante abre `Cena_principal.unity`, monta os prefabs/ferramentas de cena (como os menus de `GeradorColetaveisAutomatico.cs`), testa em Play Mode e realiza o commit final.
+- **Integração final controlada:** Ao concluir as features na `develop`, antes de promover para a `main`, apenas um integrante abre `Cena_principal.unity`, monta os prefabs/ferramentas de cena (como os menus de `GeradorColetaveisAutomatico.cs`), testa em Play Mode e realiza o commit final.
 
 ---
 
-## 2. Guia de Arquivos `.meta` (Alteração Real vs. Ruído do Unity)
+## 3. Guia de Arquivos `.meta` (Alteração Real vs. Ruído do Unity)
 
 No Unity, todo arquivo e pasta dentro de `Assets/` possui um arquivo `.meta` correspondente. Ele armazena:
 1. O **`guid` único** que mantém todas as referências ligadas em cenas, prefabs e ScriptableObjects;
 2. As **configurações de importação** definidas no Inspector (tipo de textura, animação, áudio, etc.).
 
-### 2.1. Como inspecionar alterações em `.meta` antes de commitar
+### 3.1. Como inspecionar alterações em `.meta` antes de commitar
 
 ```powershell
 # Ver resumo de todos os .meta modificados
@@ -34,7 +52,7 @@ git diff -w -- "*.meta"
 
 Se `git diff -w -- "*.meta"` não exibir nenhuma saída, a modificação é apenas ruído de fim de linha (`LF` ↔ `CRLF`) e pode ser descartada com segurança.
 
-### 2.2. Quando é modificação SEM intenção (Ruído — pode descartar)
+### 3.2. Quando é modificação SEM intenção (Ruído — pode descartar)
 
 Descarte quando notar:
 - Dezenas de `.meta` de **pacotes de terceiros** modificados de uma só vez (ex.: pacotes de música, efeitos sonoros ou assets externos que você não editou);
@@ -47,7 +65,7 @@ Para reverter ruído em uma pasta ou arquivo específico sem afetar seu trabalho
 git checkout -- "Assets/Caminho/Da/PastaOuArquivo"
 ```
 
-### 2.3. Quando é modificação REAL (DEVE commitar)
+### 3.3. Quando é modificação REAL (DEVE commitar)
 
 Commite sempre o `.meta` junto com o asset quando:
 - **Criar um arquivo ou pasta nova (`??` / `A`):** Todo script, cena, prefab, material, sprite ou pasta criada precisa ir acompanhada de seu `.meta` no mesmo commit. Sem ele, o Unity gera um `guid` diferente na máquina dos colegas e quebra referências (`Missing Script` / `Missing Prefab`).
@@ -57,19 +75,19 @@ Commite sempre o `.meta` junto com o asset quando:
   - **Áudio (`.wav.meta`):** alterou deliberadamente `Load Type`, `Force To Mono` ou `Quality`;
 - **Mover ou renomear um arquivo/pasta:** o `.meta` deve acompanhar a movimentação para preservar o `guid` original.
 
-### 2.4. Regra de Ouro dos `.meta`
+### 3.4. Regra de Ouro dos `.meta`
 - **Nunca apague** o `.meta` de um asset existente nem **edite o campo `guid:`** manualmente (exceto ao duplicar intencionalmente um arquivo fora do Unity, garantindo um novo GUID único).
 - Se o asset está em `Assets/_Project/` e você acabou de criá-lo ou configurá-lo no Inspector → **commite o `.meta`**.
 - Se o arquivo pertence a um pacote externo que você nem abriu e o `git diff` mostra apenas `serializedVersion` ou `CRLF` → **descarte com `git checkout --`**.
 
 ---
 
-## 3. Checklist Rápido Antes de Commitar
+## 4. Checklist Rápido Antes de Commitar
 
 1. **Atualize sua branch com frequência** antes de iniciar novas tarefas:
    ```powershell
    git fetch origin
-   git merge origin/main
+   git merge origin/develop
    ```
 2. **Revise o estado dos arquivos** antes de adicionar ao stage (evite `git add .` sem conferir):
    ```powershell
@@ -80,4 +98,4 @@ Commite sempre o `.meta` junto com o asset quando:
    ```powershell
    git checkout -- Assets/_Project/Scenes/Cena_principal.unity
    ```
-5. **Mantenha Pull Requests pequenos e focados** para facilitar revisão e integração na `main`.
+5. **Mantenha Pull Requests pequenos e focados** na `develop`, reservando a `main` apenas para versões consolidadas.
