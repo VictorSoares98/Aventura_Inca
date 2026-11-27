@@ -2,7 +2,8 @@
 
 Protótipo em Unity 3D de aventura arqueológica com ficção científica oculta — **Versão Arqueólogo Metamorfo**.
 
-> Documentação completa de design disponível no [Documento de Design de Jogo (GDD.md)](./GDD.md).
+> Documentação completa de design disponível no [Documento de Design de Jogo (GDD.md)](./GDD.md).  
+> Regras de trabalho em equipe, cenas e arquivos `.meta` em [Guia de Contribuição (CONTRIBUTING.md)](./CONTRIBUTING.md).
 
 ---
 
