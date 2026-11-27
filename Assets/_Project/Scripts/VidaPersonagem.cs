@@ -15,6 +15,9 @@ public class VidaPersonagem : MonoBehaviour
 
     private bool estaMorto;
 
+    public bool EstaMorto => estaMorto;
+    public bool EstaComVidaCheia => vidaAtual >= vidaMaxima;
+
     private void Start()
     {
         vidaAtual = vidaMaxima;
