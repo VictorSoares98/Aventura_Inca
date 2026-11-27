@@ -93,9 +93,95 @@
             "sceneName": "Cena_principal"
         },
         {
-            "colors": [],
+            "colors": [
+                {
+                    "objID": "Cena_Coletaveis_Inventario_CAMERA_0",
+                    "colorValue": "BF4040FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_LUZ_1",
+                    "colorValue": "BFBF40FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_TERRENO_2",
+                    "colorValue": "40BF40FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_PLAYER_3",
+                    "colorValue": "4CB5FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "008080FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_POSTE DE LUZ_1_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__ESTRADA_2_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__QUEBRA MOLA_3_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
+                    "colorValue": "8000FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_HUD_4",
+                    "colorValue": "BF4040FF"
+                }
+            ],
             "styles": [],
-            "showComponents": [],
+            "showComponents": [
+                {
+                    "objID": "Cena_Coletaveis_Inventario_CAMERA_0",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_LUZ_1",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_PLAYER_3",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_POSTE DE LUZ_1_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__ESTRADA_2_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__QUEBRA MOLA_3_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                }
+            ],
             "sceneName": "Cena_Coletaveis_Inventario"
         }
     ]
