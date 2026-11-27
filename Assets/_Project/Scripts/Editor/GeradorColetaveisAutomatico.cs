@@ -66,15 +66,19 @@ public static class GeradorColetaveisAutomatico
     [MenuItem("Aventura Inca/2. Montar HUD e Inventário na Cena (1 Clique)", false, 2)]
     public static void MontarUICompletaNaCena()
     {
-        EditorUtility.DisplayProgressBar("Aventura Inca", "Localizando jogador e canvas...", 0.2f);
+        if (!Application.isBatchMode)
+            EditorUtility.DisplayProgressBar("Aventura Inca", "Configurando HUD e Inventário na cena...", 0.2f);
 
         GameObject jogador = GameObject.Find("Ch18_nonPBR");
         if (jogador == null) jogador = GameObject.FindWithTag("Player");
 
         if (jogador == null)
         {
-            EditorUtility.ClearProgressBar();
-            EditorUtility.DisplayDialog("Aviso", "Jogador não encontrado na cena. Verifique se o objeto do personagem está presente.", "OK");
+            if (!Application.isBatchMode)
+            {
+                EditorUtility.ClearProgressBar();
+                EditorUtility.DisplayDialog("Aviso", "Jogador não encontrado na cena. Verifique se o objeto do personagem está presente.", "OK");
+            }
             return;
         }
 
@@ -85,11 +89,19 @@ public static class GeradorColetaveisAutomatico
             EditorUtility.SetDirty(jogador);
         }
 
+        VidaPersonagem vida = jogador.GetComponent<VidaPersonagem>();
+        if (vida == null)
+        {
+            vida = jogador.AddComponent<VidaPersonagem>();
+            EditorUtility.SetDirty(jogador);
+        }
+
         // 1. Canvas e EventSystem
         Canvas canvas = Object.FindFirstObjectByType<Canvas>();
         if (canvas == null)
         {
-            GameObject canvasObj = new GameObject("Canvas", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            GameObject canvasObj = new GameObject("HUD", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
+            canvasObj.layer = 5;
             canvas = canvasObj.GetComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             CanvasScaler scaler = canvasObj.GetComponent<CanvasScaler>();
@@ -100,6 +112,8 @@ public static class GeradorColetaveisAutomatico
         }
         else
         {
+            canvas.gameObject.layer = 5;
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             CanvasScaler scaler = canvas.GetComponent<CanvasScaler>();
             if (scaler != null)
             {
@@ -115,7 +129,95 @@ public static class GeradorColetaveisAutomatico
             Undo.RegisterCreatedObjectUndo(esObj, "Criar EventSystem");
         }
 
-        // 2. Objetivo de Relíquias
+        // 2. Barra de Vida (PainelVida do Rafael / Sistema de Vida)
+        Transform painelVidaTrans = canvas.transform.Find("PainelVida");
+        GameObject painelVidaObj;
+        if (painelVidaTrans == null)
+        {
+            painelVidaObj = new GameObject("PainelVida", typeof(RectTransform), typeof(Image));
+            painelVidaObj.transform.SetParent(canvas.transform, false);
+            painelVidaTrans = painelVidaObj.transform;
+        }
+        else
+        {
+            painelVidaObj = painelVidaTrans.gameObject;
+        }
+        painelVidaObj.layer = 5;
+        RectTransform rtPV = painelVidaObj.GetComponent<RectTransform>();
+        rtPV.anchorMin = new Vector2(1f, 1f);
+        rtPV.anchorMax = new Vector2(1f, 1f);
+        rtPV.pivot = new Vector2(1f, 1f);
+        rtPV.anchoredPosition = new Vector2(-40f, -40f);
+        rtPV.sizeDelta = new Vector2(280f, 44f);
+
+        Image imgPV = painelVidaObj.GetComponent<Image>();
+        if (imgPV == null) imgPV = painelVidaObj.AddComponent<Image>();
+        imgPV.color = new Color(0.08f, 0.08f, 0.1f, 0.85f);
+
+        // Fundo da barra de vida
+        Transform fundoVidaTrans = painelVidaTrans.Find("FundoVida");
+        GameObject fundoVidaObj;
+        if (fundoVidaTrans == null)
+        {
+            fundoVidaObj = new GameObject("FundoVida", typeof(RectTransform), typeof(Image));
+            fundoVidaObj.transform.SetParent(painelVidaTrans, false);
+            fundoVidaTrans = fundoVidaObj.transform;
+        }
+        else
+        {
+            fundoVidaObj = fundoVidaTrans.gameObject;
+        }
+        fundoVidaObj.layer = 5;
+        RectTransform rtFV = fundoVidaObj.GetComponent<RectTransform>();
+        rtFV.anchorMin = Vector2.zero;
+        rtFV.anchorMax = Vector2.one;
+        rtFV.offsetMin = new Vector2(4f, 4f);
+        rtFV.offsetMax = new Vector2(-4f, -4f);
+        Image imgFV = fundoVidaObj.GetComponent<Image>();
+        if (imgFV == null) imgFV = fundoVidaObj.AddComponent<Image>();
+        imgFV.color = new Color(0.28f, 0.05f, 0.05f, 0.95f);
+
+        // Barra de preenchimento (BarraVida)
+        Transform barraVidaTrans = fundoVidaTrans.Find("BarraVida");
+        GameObject barraVidaObj;
+        if (barraVidaTrans == null)
+        {
+            barraVidaObj = new GameObject("BarraVida", typeof(RectTransform), typeof(Image));
+            barraVidaObj.transform.SetParent(fundoVidaTrans, false);
+            barraVidaTrans = barraVidaObj.transform;
+        }
+        else
+        {
+            barraVidaObj = barraVidaTrans.gameObject;
+        }
+        barraVidaObj.layer = 5;
+        RectTransform rtBV = barraVidaObj.GetComponent<RectTransform>();
+        rtBV.anchorMin = Vector2.zero;
+        rtBV.anchorMax = Vector2.one;
+        rtBV.offsetMin = Vector2.zero;
+        rtBV.offsetMax = Vector2.zero;
+        Image imgBarraVida = barraVidaObj.GetComponent<Image>();
+        if (imgBarraVida == null) imgBarraVida = barraVidaObj.AddComponent<Image>();
+        imgBarraVida.color = new Color(0.92f, 0.18f, 0.22f, 1f);
+        imgBarraVida.type = Image.Type.Filled;
+        imgBarraVida.fillMethod = Image.FillMethod.Horizontal;
+        imgBarraVida.fillOrigin = (int)Image.OriginHorizontal.Left;
+        imgBarraVida.fillAmount = 1f;
+
+        // Texto numérico de Vida ("100 / 100 HP")
+        TextMeshProUGUI tmpTextoVida = CriarOuObterTextoTMP(painelVidaTrans, "Texto_Vida", "100 / 100 HP",
+            Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 18, Color.white, TextAlignmentOptions.Center);
+        tmpTextoVida.fontStyle = FontStyles.Bold;
+
+        // Conecta as referências no componente VidaPersonagem
+        SerializedObject soVida = new SerializedObject(vida);
+        soVida.FindProperty("barraVida").objectReferenceValue = imgBarraVida;
+        SerializedProperty propTextoVida = soVida.FindProperty("textoVida");
+        if (propTextoVida != null) propTextoVida.objectReferenceValue = tmpTextoVida;
+        soVida.ApplyModifiedProperties();
+        EditorUtility.SetDirty(vida);
+
+        // 3. Objetivo de Relíquias
         ObjetivoReliquias objetivo = Object.FindFirstObjectByType<ObjetivoReliquias>();
         if (objetivo == null)
         {
@@ -128,29 +230,70 @@ public static class GeradorColetaveisAutomatico
             Undo.RegisterCreatedObjectUndo(objObjetivo, "Criar Objetivo");
         }
 
-        // 3. HUD
+        // 4. HUD de Contadores (Moedas e Relíquias visíveis na tela)
         Transform hudTrans = canvas.transform.Find("HUD_Inventario");
+        GameObject hudObj;
         if (hudTrans == null)
         {
-            GameObject hudObj = new GameObject("HUD_Inventario", typeof(RectTransform));
+            hudObj = new GameObject("HUD_Inventario", typeof(RectTransform));
             hudObj.transform.SetParent(canvas.transform, false);
             hudTrans = hudObj.transform;
-            RectTransform rtHUD = hudObj.GetComponent<RectTransform>();
-            rtHUD.anchorMin = Vector2.zero;
-            rtHUD.anchorMax = Vector2.one;
-            rtHUD.offsetMin = Vector2.zero;
-            rtHUD.offsetMax = Vector2.zero;
         }
+        else
+        {
+            hudObj = hudTrans.gameObject;
+        }
+        hudObj.layer = 5;
+        RectTransform rtHUD = hudObj.GetComponent<RectTransform>();
+        rtHUD.anchorMin = Vector2.zero;
+        rtHUD.anchorMax = Vector2.one;
+        rtHUD.offsetMin = Vector2.zero;
+        rtHUD.offsetMax = Vector2.zero;
+
+        // Limpa contadores soltos antigos caso existam
+        Transform antigoMoedas = hudTrans.Find("Contador_Moedas");
+        Transform antigoReliquias = hudTrans.Find("Contador_Reliquias");
+
+        // Painel Card de Fundo para os Contadores
+        Transform painelContadoresTrans = hudTrans.Find("Painel_Contadores");
+        GameObject painelContadoresObj;
+        if (painelContadoresTrans == null)
+        {
+            painelContadoresObj = new GameObject("Painel_Contadores", typeof(RectTransform), typeof(Image));
+            painelContadoresObj.transform.SetParent(hudTrans, false);
+            painelContadoresTrans = painelContadoresObj.transform;
+        }
+        else
+        {
+            painelContadoresObj = painelContadoresTrans.gameObject;
+        }
+        painelContadoresObj.layer = 5;
+        RectTransform rtCont = painelContadoresObj.GetComponent<RectTransform>();
+        rtCont.anchorMin = new Vector2(0f, 1f);
+        rtCont.anchorMax = new Vector2(0f, 1f);
+        rtCont.pivot = new Vector2(0f, 1f);
+        rtCont.anchoredPosition = new Vector2(40f, -40f);
+        rtCont.sizeDelta = new Vector2(250f, 90f);
+        Image imgCont = painelContadoresObj.GetComponent<Image>();
+        if (imgCont == null) imgCont = painelContadoresObj.AddComponent<Image>();
+        imgCont.color = new Color(0.08f, 0.08f, 0.1f, 0.85f);
+
+        if (antigoMoedas != null && antigoMoedas.parent != painelContadoresTrans)
+            Object.DestroyImmediate(antigoMoedas.gameObject);
+        if (antigoReliquias != null && antigoReliquias.parent != painelContadoresTrans)
+            Object.DestroyImmediate(antigoReliquias.gameObject);
 
         // Contador Moedas
-        TextMeshProUGUI tmpMoedas = CriarOuObterTextoTMP(hudTrans, "Contador_Moedas", "Moedas: 0", 
-            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -40f), new Vector2(200f, 40f), 24, Color.yellow, TextAlignmentOptions.Left, new Vector2(0f, 1f));
+        TextMeshProUGUI tmpMoedas = CriarOuObterTextoTMP(painelContadoresTrans, "Contador_Moedas", "Moedas: 0", 
+            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(16f, -14f), new Vector2(-32f, 32f), 20, new Color(1f, 0.85f, 0.2f), TextAlignmentOptions.Left, new Vector2(0f, 1f));
+        tmpMoedas.fontStyle = FontStyles.Bold;
 
         // Contador Relíquias
-        TextMeshProUGUI tmpReliquias = CriarOuObterTextoTMP(hudTrans, "Contador_Reliquias", "Relíquias: 0/5", 
-            new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -80f), new Vector2(250f, 40f), 24, new Color(1f, 0.85f, 0.4f), TextAlignmentOptions.Left, new Vector2(0f, 1f));
+        TextMeshProUGUI tmpReliquias = CriarOuObterTextoTMP(painelContadoresTrans, "Contador_Reliquias", "Relíquias: 0/5", 
+            new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(16f, -48f), new Vector2(-32f, 32f), 20, new Color(0.4f, 0.9f, 1f), TextAlignmentOptions.Left, new Vector2(0f, 1f));
+        tmpReliquias.fontStyle = FontStyles.Bold;
 
-        // Notificação
+        // Notificação Central
         TextMeshProUGUI tmpNotif = CriarOuObterTextoTMP(hudTrans, "Texto_Notificacao", "", 
             new Vector2(0.5f, 0.25f), new Vector2(0.5f, 0.25f), Vector2.zero, new Vector2(500f, 50f), 26, Color.white, TextAlignmentOptions.Center);
 
@@ -162,12 +305,13 @@ public static class GeradorColetaveisAutomatico
         {
             painelAviso = new GameObject("Painel_Aviso", typeof(RectTransform), typeof(Image));
             painelAviso.transform.SetParent(hudTrans, false);
+            avisoTrans = painelAviso.transform;
             RectTransform rtAviso = painelAviso.GetComponent<RectTransform>();
             rtAviso.anchorMin = new Vector2(0.5f, 0.15f);
             rtAviso.anchorMax = new Vector2(0.5f, 0.15f);
-            rtAviso.sizeDelta = new Vector2(450f, 45f);
+            rtAviso.sizeDelta = new Vector2(480f, 50f);
             Image imgAviso = painelAviso.GetComponent<Image>();
-            imgAviso.color = new Color(0f, 0f, 0f, 0.75f);
+            imgAviso.color = new Color(0f, 0f, 0f, 0.85f);
 
             tmpAviso = CriarOuObterTextoTMP(painelAviso.transform, "Texto_Aviso", "Pressione [E] para coletar",
                 Vector2.zero, Vector2.one, Vector2.zero, Vector2.zero, 20, Color.white, TextAlignmentOptions.Center);
@@ -178,6 +322,7 @@ public static class GeradorColetaveisAutomatico
             painelAviso = avisoTrans.gameObject;
             tmpAviso = avisoTrans.GetComponentInChildren<TextMeshProUGUI>();
         }
+        painelAviso.layer = 5;
 
         // Anexa HUDInventario
         HUDInventario hudComp = canvas.GetComponent<HUDInventario>();
@@ -193,7 +338,7 @@ public static class GeradorColetaveisAutomatico
         soHUD.FindProperty("textoNotificacao").objectReferenceValue = tmpNotif;
         soHUD.ApplyModifiedProperties();
 
-        // 4. Painel de Inventário (Grade de Slots)
+        // 5. Painel de Inventário (Grade de Slots)
         Transform painelInvTrans = canvas.transform.Find("Painel_Inventario");
         GameObject painelInvObj;
         Transform gridTrans;
@@ -244,6 +389,7 @@ public static class GeradorColetaveisAutomatico
             txtNomeDetalhe = painelInvTrans.Find("Texto_NomeItem")?.GetComponent<TextMeshProUGUI>();
             txtDescDetalhe = painelInvTrans.Find("Texto_DescItem")?.GetComponent<TextMeshProUGUI>();
         }
+        painelInvObj.layer = 5;
 
         // Anexa InventarioUI
         InventarioUI invUI = canvas.GetComponent<InventarioUI>();
@@ -272,18 +418,40 @@ public static class GeradorColetaveisAutomatico
         painelInvObj.SetActive(false);
 
         EditorSceneManager.MarkSceneDirty(EditorSceneManager.GetActiveScene());
-        EditorUtility.ClearProgressBar();
-
-        EditorUtility.DisplayDialog("Trabalho Pronto!", 
-            "A interface completa do inventário e HUD foi montada na cena!\n\n" +
-            "✔ HUD com contadores de Moedas e Relíquias\n" +
-            "✔ Aviso de interação 'Pressione [E]'\n" +
-            "✔ Notificação de coleta '+1 Moeda'\n" +
-            "✔ Painel de Inventário em grade (Tecla [I])\n" +
-            "✔ Bloqueio automático de movimento ao abrir o inventário\n\n" +
-            "Dê PLAY agora e teste a coleta e o inventário!", "Excelente!");
+        if (!Application.isBatchMode)
+        {
+            EditorUtility.ClearProgressBar();
+            EditorUtility.DisplayDialog("Trabalho Pronto!", 
+                "A interface completa do HUD e Inventário foi configurada com sucesso!\n\n" +
+                "✔ Barra de Vida com texto numérico visível (Top-Right)\n" +
+                "✔ HUD com contadores de Moedas e Relíquias destacados (Top-Left)\n" +
+                "✔ Aviso de interação 'Pressione [E]'\n" +
+                "✔ Notificação de coleta '+1 Moeda'\n" +
+                "✔ Painel de Inventário em grade (Tecla [I])\n\n" +
+                "Dê PLAY agora e teste tudo na tela!", "Excelente!");
+        }
 
         Debug.Log("[GeradorColetaveis] Sucesso: HUD e Inventário montados na cena.");
+    }
+
+    public static void ExecutarMontagemBatch()
+    {
+        string[] cenas = new string[] {
+            "Assets/_Project/Scenes/Cena_principal.unity",
+            "Assets/_Project/Scenes/Cena_Coletaveis_Inventario.unity"
+        };
+
+        foreach (string caminhoCena in cenas)
+        {
+            if (File.Exists(caminhoCena))
+            {
+                Debug.Log($"[GeradorColetaveis] Montando HUD e Inventário na cena: {caminhoCena}");
+                var cena = EditorSceneManager.OpenScene(caminhoCena, OpenSceneMode.Single);
+                MontarUICompletaNaCena();
+                EditorSceneManager.SaveScene(cena);
+                Debug.Log($"[GeradorColetaveis] Cena salva com sucesso: {caminhoCena}");
+            }
+        }
     }
 
     private static TextMeshProUGUI CriarOuObterTextoTMP(Transform pai, string nome, string textoInicial, 
@@ -292,6 +460,7 @@ public static class GeradorColetaveisAutomatico
         Transform t = pai.Find(nome);
         GameObject go = t != null ? t.gameObject : new GameObject(nome, typeof(RectTransform), typeof(TextMeshProUGUI));
         go.transform.SetParent(pai, false);
+        go.layer = 5;
 
         RectTransform rt = go.GetComponent<RectTransform>();
         rt.anchorMin = anchorMin;
@@ -301,6 +470,7 @@ public static class GeradorColetaveisAutomatico
         if (sizeDelta != Vector2.zero) rt.sizeDelta = sizeDelta;
 
         TextMeshProUGUI tmp = go.GetComponent<TextMeshProUGUI>();
+        tmp.raycastTarget = false;
         tmp.text = textoInicial;
         tmp.fontSize = fontSize;
         tmp.color = cor;

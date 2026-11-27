@@ -1,7 +1,7 @@
 
 using UnityEngine;
 using UnityEngine.UI;
-
+using TMPro;
 
 public class VidaPersonagem : MonoBehaviour
 {
@@ -11,7 +11,7 @@ public class VidaPersonagem : MonoBehaviour
 
     [Header("HUD")]
     [SerializeField] private Image barraVida;
-   
+    [SerializeField] private TextMeshProUGUI textoVida;
 
     private bool estaMorto;
 
@@ -26,6 +26,14 @@ public class VidaPersonagem : MonoBehaviour
         vidaAtual = vidaMaxima;
 
         AtualizarHUD();
+    }
+
+    private void Update()
+    {
+        if (estaMorto && Input.GetKeyDown(KeyCode.R))
+        {
+            Renascer();
+        }
     }
 
     public void ReceberDano(float quantidade)
@@ -67,7 +75,12 @@ public class VidaPersonagem : MonoBehaviour
     {
         if (barraVida != null)
         {
-            barraVida.fillAmount = vidaAtual / vidaMaxima;
+            barraVida.fillAmount = vidaMaxima > 0f ? (vidaAtual / vidaMaxima) : 0f;
+        }
+
+        if (textoVida != null)
+        {
+            textoVida.text = $"{Mathf.CeilToInt(vidaAtual)} / {Mathf.CeilToInt(vidaMaxima)} HP";
         }
     }
 
