@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 1bb73eea71a6be74ebda378e85fd4132
+guid: 76f754badd712e84f8a624aa5702874d
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Shoe_On_Street_06.wav
-  uploadId: 872572

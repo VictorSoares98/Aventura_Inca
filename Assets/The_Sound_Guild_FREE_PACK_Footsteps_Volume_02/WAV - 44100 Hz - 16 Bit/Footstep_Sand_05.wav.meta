@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e5a9f62497e6f014eb77c3b5702a7e1a
+guid: 7a64fcaf08a3d9c499e7d7f9b1116634
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Sand_05.wav
-  uploadId: 872572

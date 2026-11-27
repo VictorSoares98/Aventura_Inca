@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 5290546c19933724bbeb917c0eb1be9d
+guid: 859cf15f5113e4d469107a275f676248
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Grass_Alternative_01.wav
-  uploadId: 872572

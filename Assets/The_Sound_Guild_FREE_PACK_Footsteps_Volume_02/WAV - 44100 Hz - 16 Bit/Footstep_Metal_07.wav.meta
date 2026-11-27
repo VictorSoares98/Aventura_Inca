@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 19d0da907a1847e4d8a6ae07750c227e
+guid: bb1a3cf47366a9545a0d3dc25495e626
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Metal_07.wav
-  uploadId: 872572

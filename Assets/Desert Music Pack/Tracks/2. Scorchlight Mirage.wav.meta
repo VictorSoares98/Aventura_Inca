@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: a6f7279564802e64797a1ae7f93c94e8
+guid: 16821cdf55b77c74a9e65c779e11ae0c
 AudioImporter:
   externalObjects: {}
-  serializedVersion: 7
+  serializedVersion: 8
   defaultSettings:
     serializedVersion: 2
     loadType: 0
@@ -21,10 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 338276
-  packageName: Free 6 Desert Tracks Music Pack
-  packageVersion: 1.0
-  assetPath: Assets/Desert Music Pack/Tracks/2. Scorchlight Mirage.wav
-  uploadId: 800622
