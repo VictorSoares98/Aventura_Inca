@@ -15,6 +15,12 @@ public class VidaPersonagem : MonoBehaviour
 
     private bool estaMorto;
 
+    public bool EstaMorto => estaMorto;
+    public bool EstaComVidaCheia => vidaAtual >= vidaMaxima;
+
+    public static event System.Action AoJogadorMorrer;
+    public static event System.Action AoJogadorRenascer;
+
     private void Start()
     {
         vidaAtual = vidaMaxima;
@@ -69,14 +75,36 @@ public class VidaPersonagem : MonoBehaviour
     {
         estaMorto = true;
 
-        Debug.Log("O personagem morreu!");
+        Debug.LogWarning("[VidaPersonagem] O personagem morreu! Pressione [R] para renascer com vida cheia.");
 
-        ControleJogador controle =
-            GetComponent<ControleJogador>();
-
+        ControleJogador controle = GetComponent<ControleJogador>();
         if (controle != null)
         {
             controle.enabled = false;
         }
+
+        AoJogadorMorrer?.Invoke();
+    }
+
+    public void Renascer()
+    {
+        estaMorto = false;
+        vidaAtual = vidaMaxima;
+        AtualizarHUD();
+
+        ControleJogador controle = GetComponent<ControleJogador>();
+        if (controle != null)
+        {
+            controle.enabled = true;
+        }
+
+        CharacterController character = GetComponent<CharacterController>();
+        if (character != null)
+        {
+            character.enabled = true;
+        }
+
+        AoJogadorRenascer?.Invoke();
+        Debug.Log("[VidaPersonagem] Jogador renasceu com vida cheia e movimento reativado!");
     }
 }

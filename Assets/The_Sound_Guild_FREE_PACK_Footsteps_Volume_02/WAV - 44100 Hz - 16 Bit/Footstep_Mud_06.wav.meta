@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: b3b19df5958678c48b5dae3bffc89a3a
+guid: 7d5319e0599275342a21ed77283fd356
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Mud_06.wav
-  uploadId: 872572

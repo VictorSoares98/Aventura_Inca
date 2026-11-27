@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 9f8067edd7d8dee458f05b7d244179f0
+guid: 6347dc0c0708f02498b8ef0cfb3b664c
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Wood_04.wav
-  uploadId: 872572

@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 3cc041e1dabdaec45ac2b0a11eb3f084
+guid: 4447559ff8c749e4981a6b70cc81fa72
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Shoe_04.wav
-  uploadId: 872572

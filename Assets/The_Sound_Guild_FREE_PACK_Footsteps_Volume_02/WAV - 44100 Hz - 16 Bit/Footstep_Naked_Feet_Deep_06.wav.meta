@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 0439f1ddd92b67b41b52fd59a336f5f8
+guid: 7d745211045361e40a0facc7600a77b7
 AudioImporter:
   externalObjects: {}
   serializedVersion: 8
@@ -21,11 +21,3 @@ AudioImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 351282
-  packageName: Footsteps Sounds - Volume 02
-  packageVersion: 1.0
-  assetPath: Assets/The_Sound_Guild_FREE_PACK_Footsteps_Volume_02/WAV - 44100 Hz
-    - 16 Bit/Footstep_Naked_Feet_Deep_06.wav
-  uploadId: 872572
