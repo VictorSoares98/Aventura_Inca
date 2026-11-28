@@ -137,10 +137,6 @@
                     "colorValue": "8000FFFF"
                 },
                 {
-                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_1_TERRENO_2",
-                    "colorValue": "8000FFFF"
-                },
-                {
                     "objID": "Cena_Coletaveis_Inventario_HUD_4",
                     "colorValue": "BF4040FF"
                 },
@@ -175,6 +171,10 @@
                 {
                     "objID": "Cena_Coletaveis_Inventario__POCOES_2_COLETAVEIS_5",
                     "colorValue": "E64553FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_1_TERRENO_2",
+                    "colorValue": "8000FFFF"
                 }
             ],
             "styles": [],
@@ -216,10 +216,6 @@
                     "show": false
                 },
                 {
-                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_1_TERRENO_2",
-                    "show": false
-                },
-                {
                     "objID": "Cena_Coletaveis_Inventario_COLETAVEIS_5",
                     "show": false
                 },
@@ -253,6 +249,10 @@
                 },
                 {
                     "objID": "Cena_Coletaveis_Inventario_HUD_4",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_1_TERRENO_2",
                     "show": false
                 }
             ],
