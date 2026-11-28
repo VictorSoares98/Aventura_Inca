@@ -267,6 +267,18 @@
             "styles": [],
             "showComponents": [],
             "sceneName": ""
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "Cena_Fase2_Ruinas"
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "Cena_Fase3_Nave"
         }
     ]
 }
