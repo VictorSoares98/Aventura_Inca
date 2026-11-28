@@ -18,6 +18,11 @@ public class PortalProximaFase : MonoBehaviour
     [SerializeField] private bool exigirObjetivoReliquias = true;
     [SerializeField] private string tagJogador = "Player";
 
+    [Header("Aparição Dinâmica (Opcional)")]
+    [Tooltip("Quando marcado, o portal move-se para frente do jogador assim que todas as relíquias forem coletadas.")]
+    [SerializeField] private bool abrirPertoDoJogadorAoConcluir = false;
+    [SerializeField, Min(3f)] private float distanciaAoAbrir = 7f;
+
     [Header("Feedback e Transição")]
     [SerializeField] private AudioClip somPortal;
     [SerializeField, Range(0f, 1f)] private float volumeSom = 0.9f;
@@ -35,6 +40,9 @@ public class PortalProximaFase : MonoBehaviour
     private ObjetivoReliquias objetivo;
     private bool transicaoIniciada;
     private bool jogadorNoAlcance;
+    private bool avisoObjetivoExibido;
+    private bool inscritoObjetivo;
+    private Coroutine rotinaOcultarAviso;
 
     private void Reset()
     {
@@ -50,9 +58,105 @@ public class PortalProximaFase : MonoBehaviour
             Debug.LogWarning($"[PortalProximaFase] Collider em '{name}' não está marcado como Is Trigger.", this);
     }
 
+    private void OnEnable()
+    {
+        GarantirInscricaoObjetivo();
+    }
+
     private void Start()
     {
-        objetivo = FindFirstObjectByType<ObjetivoReliquias>();
+        GarantirInscricaoObjetivo();
+    }
+
+    private void GarantirInscricaoObjetivo()
+    {
+        if (objetivo == null)
+            objetivo = FindFirstObjectByType<ObjetivoReliquias>();
+
+        if (objetivo != null && !inscritoObjetivo)
+        {
+            objetivo.AoProgresso += AoAtualizarObjetivo;
+            inscritoObjetivo = true;
+        }
+    }
+
+    private void AoAtualizarObjetivo(int coletadas, int meta)
+    {
+        if (!exigirObjetivoReliquias || avisoObjetivoExibido || coletadas < meta)
+            return;
+
+        avisoObjetivoExibido = true;
+
+        string mensagem;
+        if (abrirPertoDoJogadorAoConcluir)
+        {
+            ReposicionarPertoDoJogador();
+            mensagem = "Todas as relíquias coletadas! O portal se abriu à sua frente!";
+        }
+        else
+        {
+            mensagem = "Todas as relíquias coletadas! Siga até o feixe azul do Portal para avançar!";
+        }
+
+        TocarSomPortal();
+        AoExibirMensagemPortal?.Invoke(mensagem);
+
+        if (rotinaOcultarAviso != null)
+            StopCoroutine(rotinaOcultarAviso);
+        rotinaOcultarAviso = StartCoroutine(RotinaOcultarAvisoDesbloqueio());
+    }
+
+    private IEnumerator RotinaOcultarAvisoDesbloqueio()
+    {
+        yield return new WaitForSecondsRealtime(4.5f);
+
+        if (!jogadorNoAlcance && !transicaoIniciada)
+            AoOcultarMensagemPortal?.Invoke();
+
+        rotinaOcultarAviso = null;
+    }
+
+    private void ReposicionarPertoDoJogador()
+    {
+        GameObject jogador = !string.IsNullOrEmpty(tagJogador)
+            ? GameObject.FindWithTag(tagJogador)
+            : null;
+
+        if (jogador == null)
+        {
+            ControleJogador controle = FindFirstObjectByType<ControleJogador>();
+            if (controle != null)
+                jogador = controle.gameObject;
+        }
+
+        if (jogador == null)
+            return;
+
+        Vector3 frente = jogador.transform.forward;
+        frente.y = 0f;
+        if (frente.sqrMagnitude < 0.001f)
+            frente = Vector3.forward;
+        frente.Normalize();
+
+        Vector3 posAlvo = jogador.transform.position + frente * distanciaAoAbrir;
+        Vector3 origemRay = new Vector3(posAlvo.x, jogador.transform.position.y + 30f, posAlvo.z);
+        int mascara = ~LayerMask.GetMask("Ignore Raycast");
+
+        if (Physics.Raycast(origemRay, Vector3.down, out RaycastHit hit, 80f, mascara, QueryTriggerInteraction.Ignore))
+        {
+            posAlvo.y = hit.point.y;
+        }
+        else if (Terrain.activeTerrain != null)
+        {
+            posAlvo.y = Terrain.activeTerrain.SampleHeight(posAlvo) + Terrain.activeTerrain.transform.position.y;
+        }
+
+        transform.position = posAlvo;
+
+        Vector3 dirParaJogador = jogador.transform.position - posAlvo;
+        dirParaJogador.y = 0f;
+        if (dirParaJogador.sqrMagnitude > 0.001f)
+            transform.rotation = Quaternion.LookRotation(dirParaJogador);
     }
 
     private void OnTriggerEnter(Collider outro)
@@ -75,13 +179,7 @@ public class PortalProximaFase : MonoBehaviour
 
         transicaoIniciada = true;
         AoOcultarMensagemPortal?.Invoke();
-
-        if (somPortal != null)
-        {
-            Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
-            AudioSource.PlayClipAtPoint(somPortal, posAudio, volumeSom);
-        }
-
+        TocarSomPortal();
         StartCoroutine(RotinaTransicao());
     }
 
@@ -96,11 +194,32 @@ public class PortalProximaFase : MonoBehaviour
 
     private void OnDisable()
     {
-        if (!jogadorNoAlcance)
+        if (objetivo != null && inscritoObjetivo)
+        {
+            objetivo.AoProgresso -= AoAtualizarObjetivo;
+            inscritoObjetivo = false;
+        }
+
+        if (rotinaOcultarAviso != null)
+        {
+            StopCoroutine(rotinaOcultarAviso);
+            rotinaOcultarAviso = null;
+        }
+
+        if (jogadorNoAlcance)
+        {
+            jogadorNoAlcance = false;
+            AoOcultarMensagemPortal?.Invoke();
+        }
+    }
+
+    private void TocarSomPortal()
+    {
+        if (somPortal == null)
             return;
 
-        jogadorNoAlcance = false;
-        AoOcultarMensagemPortal?.Invoke();
+        Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(somPortal, posAudio, volumeSom);
     }
 
     private IEnumerator RotinaTransicao()

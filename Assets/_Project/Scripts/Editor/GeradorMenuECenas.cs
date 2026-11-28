@@ -168,6 +168,100 @@ public static class GeradorMenuECenas
         RegistrarCenasNoBuildSettings(silencioso: false);
     }
 
+    [MenuItem("Aventura Inca/14. Adicionar Portal na Fase 1 (Cena_principal) + Atualizar Farol", false, 14)]
+    public static void ConfigurarPortalFase1()
+    {
+        if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            return;
+
+        GarantirPastas();
+        CriarPrefabPortal();
+
+        if (AssetDatabase.LoadAssetAtPath<GameObject>(PathPrefabMusica) == null)
+            CriarPrefabMusicaFundo();
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        if (!File.Exists(PathCenaFase1))
+        {
+            EditorUtility.DisplayDialog("Erro", $"Cena '{PathCenaFase1}' não encontrada.", "OK");
+            return;
+        }
+
+        Scene cena = EditorSceneManager.OpenScene(PathCenaFase1, OpenSceneMode.Single);
+        Terrain terreno = Terrain.activeTerrain;
+        Vector3 tSize = (terreno != null && terreno.terrainData != null) ? terreno.terrainData.size : new Vector3(120f, 10f, 120f);
+        float margem = Mathf.Min(18f, Mathf.Min(tSize.x, tSize.z) * 0.12f);
+
+        GameObject jogadorObj = LocalizarOuInstanciarJogador();
+        Vector3 frente = jogadorObj != null ? jogadorObj.transform.forward : Vector3.forward;
+        frente.y = 0f;
+        if (frente.sqrMagnitude < 0.001f)
+            frente = Vector3.forward;
+        frente.Normalize();
+
+        Vector3 origemPos = jogadorObj != null ? jogadorObj.transform.position : Vector3.zero;
+        Vector3 posPortal = PontoNoTerreno(terreno, origemPos + frente * 22f, margem, 0f);
+
+        Dictionary<string, Transform> raiz = CriarEstruturaRaiz(cena);
+
+        foreach (PortalProximaFase existente in UnityEngine.Object.FindObjectsByType<PortalProximaFase>(FindObjectsSortMode.None))
+        {
+            if (existente != null)
+                DestruirObjetoComSeguranca(existente.gameObject);
+        }
+
+        GameObject portalObj = InstanciarPrefabSeExistir(PathPrefabPortal, posPortal, "Portal_Para_Fase2");
+        if (portalObj != null)
+        {
+            portalObj.transform.rotation = Quaternion.LookRotation(-frente);
+            portalObj.transform.SetParent(raiz["SISTEMAS"], true);
+            ConfigurarPortal(portalObj, "Cena_Fase2_Ruinas", ehFinal: false, exigirReliquias: true);
+        }
+
+        if (UnityEngine.Object.FindFirstObjectByType<ObjetivoReliquias>() == null)
+        {
+            GameObject objFase = new GameObject("Objetivo_Fase");
+            objFase.transform.SetParent(raiz["SISTEMAS"], false);
+            ObjetivoReliquias objetivo = objFase.AddComponent<ObjetivoReliquias>();
+            SerializedObject soObj = new SerializedObject(objetivo);
+            SerializedProperty propMeta = soObj.FindProperty("meta");
+            if (propMeta != null)
+                propMeta.intValue = 5;
+            soObj.ApplyModifiedProperties();
+        }
+
+        bool temMusica = false;
+        foreach (AudioSource src in UnityEngine.Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+        {
+            if (src != null && src.loop && src.GetComponentInParent<ControleJogador>() == null)
+            {
+                temMusica = true;
+                break;
+            }
+        }
+
+        if (!temMusica)
+        {
+            GameObject bgmObj = InstanciarPrefabSeExistir(PathPrefabMusica, Vector3.zero, "Prefab_MusicaFundo");
+            DefinirClipAudio(bgmObj, PathMusicaMenu);
+            ParentearSeNaoNulo(bgmObj, raiz["AUDIO"]);
+        }
+
+        EditorSceneManager.SaveScene(cena, PathCenaFase1);
+        int registradas = RegistrarCenasNoBuildSettings(silencioso: true);
+        AssetDatabase.SaveAssets();
+
+        EditorUtility.DisplayDialog(
+            "Fase 1 e Farol Atualizados!",
+            "✔ Prefab_PortalProximaFase atualizado com feixe vertical de 45m (visível em todas as fases)\n" +
+            "✔ Portal_Para_Fase2 posicionado a 22m à frente do jogador na Cena_principal.unity\n" +
+            $"✔ {registradas}/4 cenas registradas no EditorBuildSettings\n\n" +
+            "Agora dê PLAY na Cena_MenuPrincipal e clique em JOGAR para testar!",
+            "Excelente!");
+    }
+
     private static void GerarPrefabsDeFaseInterno(bool exibirDialogo)
     {
         GarantirPastas();
@@ -270,6 +364,7 @@ public static class GeradorMenuECenas
         CriarBlocoVisual(raiz.transform, "Arco_Superior", PrimitiveType.Cube, new Vector3(0f, 3.75f, 0f), new Vector3(3.8f, 0.5f, 0.75f), matPilar);
         CriarBlocoVisual(raiz.transform, "Base_Pedestal", PrimitiveType.Cube, new Vector3(0f, 0.1f, 0f), new Vector3(4.0f, 0.2f, 2.2f), matPilar);
         CriarBlocoVisual(raiz.transform, "Campo_Energia", PrimitiveType.Cube, new Vector3(0f, 1.85f, 0f), new Vector3(2.4f, 3.1f, 0.12f), matEnergia);
+        CriarBlocoVisual(raiz.transform, "Feixe_Farol", PrimitiveType.Cylinder, new Vector3(0f, 22.5f, 0f), new Vector3(0.35f, 22.5f, 0.35f), matEnergia);
 
         GameObject luzObj = new GameObject("Luz_Portal");
         luzObj.transform.SetParent(raiz.transform, false);
