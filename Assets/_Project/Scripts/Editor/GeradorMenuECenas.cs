@@ -11,13 +11,11 @@ using UnityEngine.AI;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
-#if SORTIFY
-using Sortify;
-#endif
 
 /// <summary>
 /// One-click Editor generator for Stage 4: modular phase prefabs (Portal, BGM, Victory),
-/// Cena_MenuPrincipal, Cena_Fase2_Ruinas, Cena_Fase3_Nave, and Build Settings registration (0..3).
+/// Cena_MenuPrincipal, Cena_Fase2_Ruinas and Cena_Fase3_Nave cloned onto distinct regions
+/// of the real terrain map, plus Build Settings registration (0..3).
 /// </summary>
 public static class GeradorMenuECenas
 {
@@ -34,6 +32,7 @@ public static class GeradorMenuECenas
     private const string PathPrefabHud = PastaPrefabsSistema + "/Prefab_HUD_Sistema.prefab";
     private const string PathPrefabCamera = PastaPrefabsSistema + "/Prefab_Camera.prefab";
 
+    private const string PathCenaBaseMapa = PastaCenas + "/Cena_Coletaveis_Inventario.unity";
     private const string PathCenaMenu = PastaCenas + "/Cena_MenuPrincipal.unity";
     private const string PathCenaFase1 = PastaCenas + "/Cena_principal.unity";
     private const string PathCenaFase2 = PastaCenas + "/Cena_Fase2_Ruinas.unity";
@@ -42,6 +41,20 @@ public static class GeradorMenuECenas
     private const string PathMusicaMenu = "Assets/Desert Music Pack/Loops/1. Dunes of Silence.wav";
     private const string PathMusicaFase2 = "Assets/Desert Music Pack/Loops/3. Whispers in the Sand.wav";
     private const string PathMusicaFase3 = "Assets/Desert Music Pack/Loops/4. Canyon Echoes.wav";
+
+    private struct ConfigFaseMapa
+    {
+        public string CaminhoDestino;
+        public bool EhFase3;
+        public string CaminhoMusica;
+        public string CenaDestinoPortal;
+        public bool PortalFinal;
+        public Color CorLuz;
+        public float IntensidadeLuz;
+        public Vector3 RotacaoLuz;
+        public Color CorFog;
+        public float DensidadeFog;
+    }
 
     [MenuItem("Aventura Inca/11. Gerar Prefabs de Fase (Portal, Musica, Vitoria)", false, 11)]
     public static void GerarPrefabsDeFase()
@@ -76,33 +89,39 @@ public static class GeradorMenuECenas
             return;
         }
 
-        EditorUtility.DisplayProgressBar("Aventura Inca", "Montando Cena_MenuPrincipal...", 0.25f);
-        CriarCenaMenuPrincipal();
+        int registradas = 0;
+        try
+        {
+            EditorUtility.DisplayProgressBar("Aventura Inca", "Montando Cena_MenuPrincipal...", 0.2f);
+            CriarCenaMenuPrincipal();
 
-        EditorUtility.DisplayProgressBar("Aventura Inca", "Montando Cena_Fase2_Ruinas...", 0.55f);
-        CriarCenaFase2Ruinas();
+            EditorUtility.DisplayProgressBar("Aventura Inca", "Clonando mapa real para Cena_Fase2_Ruinas (Entardecer)...", 0.5f);
+            CriarCenaFase2Ruinas();
 
-        EditorUtility.DisplayProgressBar("Aventura Inca", "Montando Cena_Fase3_Nave...", 0.85f);
-        CriarCenaFase3Nave();
+            EditorUtility.DisplayProgressBar("Aventura Inca", "Clonando mapa real para Cena_Fase3_Nave (Crepúsculo)...", 0.8f);
+            CriarCenaFase3Nave();
 
-        EditorUtility.DisplayProgressBar("Aventura Inca", "Registrando Build Settings (0..3)...", 0.95f);
-        int registradas = RegistrarCenasNoBuildSettings(silencioso: true);
+            EditorUtility.DisplayProgressBar("Aventura Inca", "Registrando Build Settings (0..3)...", 0.95f);
+            registradas = RegistrarCenasNoBuildSettings(silencioso: true);
 
-        // Abrir o Menu Principal ao final para inspeção/teste imediato
-        EditorSceneManager.OpenScene(PathCenaMenu, OpenSceneMode.Single);
-        AssetDatabase.SaveAssets();
-        AssetDatabase.Refresh();
-        EditorUtility.ClearProgressBar();
+            EditorSceneManager.OpenScene(PathCenaMenu, OpenSceneMode.Single);
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
+        }
+        finally
+        {
+            EditorUtility.ClearProgressBar();
+        }
 
         EditorUtility.DisplayDialog(
             "Etapa 4 Gerada com Sucesso!",
             $"✔ Cena_MenuPrincipal.unity criada (Build 0)\n" +
-            $"✔ Cena_Fase2_Ruinas.unity criada com NavMesh, armadilhas, inimigo e portal (Build 2)\n" +
-            $"✔ Cena_Fase3_Nave.unity criada com destroços, desafio final, portal final e Tela de Vitória (Build 3)\n" +
+            $"✔ Cena_Fase2_Ruinas.unity criada em outra região do mapa real (Entardecer, Build 2)\n" +
+            $"✔ Cena_Fase3_Nave.unity criada na terceira região do mapa real (Crepúsculo + Tela de Vitória, Build 3)\n" +
             $"✔ {registradas}/4 cenas registradas no EditorBuildSettings\n\n" +
-            "Nota (ADR-04): Cena_principal.unity (Fase 1) NÃO foi editada diretamente.\n" +
-            "Quando o responsável integrá-la, basta arrastar Prefab_PortalProximaFase (destino: Cena_Fase2_Ruinas) e Prefab_MusicaFundo para a Fase 1.\n\n" +
-            "Pressione PLAY na Cena_MenuPrincipal para testar o fluxo!",
+            "Nota (ADR-04): Cena_principal.unity e Cena_Coletaveis_Inventario.unity permaneceram intactas.\n" +
+            "Na integração da Fase 1, basta arrastar Prefab_PortalProximaFase (destino: Cena_Fase2_Ruinas) e Prefab_MusicaFundo.\n\n" +
+            "Pressione PLAY na Cena_MenuPrincipal para testar todo o percurso!",
             "Excelente!");
     }
 
@@ -327,13 +346,7 @@ public static class GeradorMenuECenas
         GameObject esObj = new GameObject("EventSystem", typeof(EventSystem), typeof(StandaloneInputModule));
 
         GameObject bgmObj = InstanciarPrefabSeExistir(PathPrefabMusica, Vector3.zero, "MusicaFundo_Menu");
-        if (bgmObj != null)
-        {
-            AudioSource src = bgmObj.GetComponent<AudioSource>();
-            AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(PathMusicaMenu);
-            if (src != null && clip != null)
-                src.clip = clip;
-        }
+        DefinirClipAudio(bgmObj, PathMusicaMenu);
 
         GameObject canvasObj = new GameObject("Canvas_MenuPrincipal", typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster), typeof(MenuPrincipalController));
         canvasObj.layer = 5;
@@ -359,7 +372,6 @@ public static class GeradorMenuECenas
 
         MenuPrincipalController controller = canvasObj.GetComponent<MenuPrincipalController>();
 
-        // Painel Principal
         GameObject painelPrincipal = CriarPainelUI(fundo.transform, "PainelPrincipal", new Color(0.14f, 0.1f, 0.06f, 0.9f));
         RectTransform rtPrincipal = painelPrincipal.GetComponent<RectTransform>();
         rtPrincipal.anchorMin = new Vector2(0.5f, 0.5f);
@@ -379,7 +391,6 @@ public static class GeradorMenuECenas
             new Vector2(0f, -90f), new Vector2(360f, 64f), new Color(0.48f, 0.16f, 0.16f));
         UnityEventTools.AddVoidPersistentListener(btnSair.onClick, controller.SairDoJogo);
 
-        // Painel Seleção de Fases
         GameObject painelFases = CriarPainelUI(fundo.transform, "PainelSelecaoFases", new Color(0.14f, 0.1f, 0.06f, 0.94f));
         RectTransform rtFases = painelFases.GetComponent<RectTransform>();
         rtFases.anchorMin = new Vector2(0.5f, 0.5f);
@@ -417,658 +428,809 @@ public static class GeradorMenuECenas
         soCtrl.FindProperty("textoStatus").objectReferenceValue = textoStatus;
         soCtrl.ApplyModifiedProperties();
 
-        OrganizarCenaComSortify(cena, camObj, null, null, null, canvasObj, null, null, null, esObj, bgmObj);
+        Dictionary<string, Transform> raiz = CriarEstruturaRaiz(cena);
+        ParentearSeNaoNulo(camObj, raiz["CAMERA"]);
+        ParentearSeNaoNulo(canvasObj, raiz["HUD"]);
+        ParentearSeNaoNulo(esObj, raiz["SISTEMAS"]);
+        ParentearSeNaoNulo(bgmObj, raiz["AUDIO"]);
 
         EditorSceneManager.SaveScene(cena, PathCenaMenu);
     }
 
     private static void CriarCenaFase2Ruinas()
     {
-        Scene cena = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-        RemoverMainCameraPadrao();
-
-        Light luz = UnityEngine.Object.FindFirstObjectByType<Light>();
-        if (luz != null)
+        ClonarEConfigurarFaseNoMapaReal(new ConfigFaseMapa
         {
-            luz.color = new Color(1f, 0.9f, 0.74f);
-            luz.intensity = 1.25f;
-        }
-
-        GameObject camObj = InstanciarPrefabSeExistir(PathPrefabCamera, Vector3.zero, "Prefab_Camera");
-        GameObject jogadorObj = InstanciarPrefabSeExistir(PathPrefabJogador, new Vector3(0f, 0.1f, -26f), "Prefab_Jogador");
-        GameObject hudObj = InstanciarPrefabSeExistir(PathPrefabHud, Vector3.zero, "Prefab_HUD_Sistema");
-
-        GameObject bgmObj = InstanciarPrefabSeExistir(PathPrefabMusica, Vector3.zero, "Prefab_MusicaFundo");
-        DefinirClipAudio(bgmObj, PathMusicaFase2);
-
-        GameObject terrenoRaiz = CriarArenaBase(
-            "Solo_Ruinas",
-            new Vector3(70f, 1f, 90f),
-            CriarOuObterMaterialURP("Mat_Solo_Ruinas", new Color(0.56f, 0.46f, 0.34f), 0f, 0.25f));
-
-        // Decoração de ruínas e cercas
-        string[] cercas =
-        {
-            "Assets/Assets_FenceChained/prefabs/chainlink_group-1.prefab",
-            "Assets/Mountain Terrain rocks and tree/Prefab/rock_set_01.prefab",
-            "Assets/Mountain Terrain rocks and tree/Prefab/rock_set_02.prefab",
-            "Assets/Mountain Terrain rocks and tree/Prefab/rock_set_03.prefab"
-        };
-        InstanciarPropSegura(cercas[1], terrenoRaiz.transform, new Vector3(-16f, 0f, -8f), new Vector3(0f, 35f, 0f));
-        InstanciarPropSegura(cercas[2], terrenoRaiz.transform, new Vector3(16f, 0f, 6f), new Vector3(0f, -45f, 0f));
-        InstanciarPropSegura(cercas[3], terrenoRaiz.transform, new Vector3(-14f, 0f, 20f), new Vector3(0f, 90f, 0f));
-        InstanciarPropSegura(cercas[0], terrenoRaiz.transform, new Vector3(-22f, 0f, 0f), new Vector3(0f, 90f, 0f));
-        InstanciarPropSegura(cercas[0], terrenoRaiz.transform, new Vector3(22f, 0f, 0f), new Vector3(0f, 90f, 0f));
-
-        // Armadilhas (Dungeon Floor Traps)
-        string[] prefabsTrap =
-        {
-            "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Grid.prefab",
-            "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Round.prefab",
-            "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Star.prefab"
-        };
-        List<GameObject> armadilhas = new List<GameObject>
-        {
-            CriarArmadilha(prefabsTrap[0], new Vector3(0f, 0.05f, -12f), 20f),
-            CriarArmadilha(prefabsTrap[1], new Vector3(-5f, 0.05f, 4f), 25f),
-            CriarArmadilha(prefabsTrap[2], new Vector3(5f, 0.05f, 18f), 25f)
-        };
-
-        // Coletáveis (5 Relíquias, 6 Moedas, 2 Poções)
-        List<GameObject> coletaveis = new List<GameObject>();
-        Vector3[] posReliquias =
-        {
-            new Vector3(-9f, 0.85f, -14f),
-            new Vector3(9f, 0.85f, -4f),
-            new Vector3(0f, 0.85f, 8f),
-            new Vector3(-10f, 0.85f, 18f),
-            new Vector3(8f, 0.85f, 24f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Reliquia.prefab", posReliquias);
-
-        Vector3[] posMoedas =
-        {
-            new Vector3(0f, 0.85f, -20f),
-            new Vector3(-3f, 0.85f, -6f),
-            new Vector3(3f, 0.85f, 0f),
-            new Vector3(-3f, 0.85f, 12f),
-            new Vector3(3f, 0.85f, 20f),
-            new Vector3(0f, 0.85f, 27f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Moeda.prefab", posMoedas);
-
-        Vector3[] posPocoes =
-        {
-            new Vector3(8f, 0.85f, -16f),
-            new Vector3(-8f, 0.85f, 12f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Pocao.prefab", posPocoes);
-
-        // Inimigo
-        List<GameObject> inimigos = new List<GameObject>
-        {
-            CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin2.prefab", "Inimigo_Guardiao_Ruinas", new Vector3(0f, 0f, 12f))
-        };
-
-        // Sistemas: Objetivo + Portal -> Fase 3
-        GameObject objFase = CriarObjetoObjetivo(5);
-        GameObject portalObj = InstanciarPrefabSeExistir(PathPrefabPortal, new Vector3(0f, 0f, 32f), "Portal_Para_Fase3");
-        ConfigurarPortal(portalObj, "Cena_Fase3_Nave", ehFinal: false, exigirReliquias: true);
-
-        // Bake NavMesh antes de salvar
-        NavMeshSurface surface = terrenoRaiz.AddComponent<NavMeshSurface>();
-        surface.collectObjects = CollectObjects.All;
-        surface.BuildNavMesh();
-
-        List<GameObject> hudObjs = hudObj != null ? new List<GameObject> { hudObj } : null;
-        List<GameObject> sistemas = new List<GameObject> { objFase, portalObj };
-        OrganizarCenaComSortify(cena, camObj, luz != null ? luz.gameObject : null, terrenoRaiz, jogadorObj, hudObjs, coletaveis, inimigos, armadilhas, sistemas, bgmObj);
-
-        EditorSceneManager.SaveScene(cena, PathCenaFase2);
+            CaminhoDestino = PathCenaFase2,
+            EhFase3 = false,
+            CaminhoMusica = PathMusicaFase2,
+            CenaDestinoPortal = "Cena_Fase3_Nave",
+            PortalFinal = false,
+            CorLuz = new Color(1f, 0.706f, 0.42f),
+            IntensidadeLuz = 1.15f,
+            RotacaoLuz = new Vector3(22f, 135f, 0f),
+            CorFog = new Color(0.76f, 0.52f, 0.34f),
+            DensidadeFog = 0.0045f
+        });
     }
 
     private static void CriarCenaFase3Nave()
     {
-        Scene cena = EditorSceneManager.NewScene(NewSceneSetup.DefaultGameObjects, NewSceneMode.Single);
-        RemoverMainCameraPadrao();
-
-        Light luz = UnityEngine.Object.FindFirstObjectByType<Light>();
-        if (luz != null)
+        ClonarEConfigurarFaseNoMapaReal(new ConfigFaseMapa
         {
-            luz.color = new Color(0.92f, 0.86f, 0.78f);
-            luz.intensity = 1.15f;
+            CaminhoDestino = PathCenaFase3,
+            EhFase3 = true,
+            CaminhoMusica = PathMusicaFase3,
+            CenaDestinoPortal = string.Empty,
+            PortalFinal = true,
+            CorLuz = new Color(0.431f, 0.51f, 0.722f),
+            IntensidadeLuz = 0.65f,
+            RotacaoLuz = new Vector3(18f, -125f, 0f),
+            CorFog = new Color(0.18f, 0.22f, 0.32f),
+            DensidadeFog = 0.006f
+        });
+    }
+
+    private static void ClonarEConfigurarFaseNoMapaReal(ConfigFaseMapa config)
+    {
+        string origemPath = File.Exists(PathCenaBaseMapa) ? PathCenaBaseMapa : PathCenaFase1;
+        if (!File.Exists(origemPath))
+        {
+            Debug.LogError("[GeradorMenuECenas] Nenhuma cena base encontrada para clonar o mapa real.");
+            return;
         }
 
-        GameObject camObj = InstanciarPrefabSeExistir(PathPrefabCamera, Vector3.zero, "Prefab_Camera");
-        GameObject jogadorObj = InstanciarPrefabSeExistir(PathPrefabJogador, new Vector3(0f, 0.1f, -28f), "Prefab_Jogador");
-        GameObject hudObj = InstanciarPrefabSeExistir(PathPrefabHud, Vector3.zero, "Prefab_HUD_Sistema");
-        GameObject vitoriaObj = InstanciarPrefabSeExistir(PathPrefabVitoria, Vector3.zero, "Prefab_TelaVitoria");
+        if (File.Exists(config.CaminhoDestino))
+            AssetDatabase.DeleteAsset(config.CaminhoDestino);
 
-        GameObject bgmObj = InstanciarPrefabSeExistir(PathPrefabMusica, Vector3.zero, "Prefab_MusicaFundo");
-        DefinirClipAudio(bgmObj, PathMusicaFase3);
-
-        GameObject terrenoRaiz = CriarArenaBase(
-            "Solo_Destrocos_Nave",
-            new Vector3(80f, 1f, 96f),
-            CriarOuObterMaterialURP("Mat_Solo_Nave", new Color(0.36f, 0.31f, 0.26f), 0.12f, 0.35f));
-
-        // Destroços da nave / cenário danificado
-        InstanciarPropSegura("Assets/Damaged Models pack1/Prefabs/trolleybus_dmg (1).prefab", terrenoRaiz.transform, new Vector3(-13f, 0f, -4f), new Vector3(0f, 25f, 0f));
-        InstanciarPropSegura("Assets/Damaged Models pack1/Prefabs/kiosk_dmg.prefab", terrenoRaiz.transform, new Vector3(14f, 0f, 10f), new Vector3(0f, -35f, 0f));
-        InstanciarPropSegura("Assets/Damaged Models pack1/Prefabs/lamppost.prefab", terrenoRaiz.transform, new Vector3(-8f, 0f, 16f), Vector3.zero);
-        InstanciarPropSegura("Assets/Damaged Models pack1/Prefabs/sign_dmg.prefab", terrenoRaiz.transform, new Vector3(7f, 0f, -15f), new Vector3(0f, 140f, 0f));
-        InstanciarPropSegura("Assets/Road props for games/Prefabs/BarrierFence.prefab", terrenoRaiz.transform, new Vector3(-20f, 0f, 0f), new Vector3(0f, 90f, 0f));
-        InstanciarPropSegura("Assets/Road props for games/Prefabs/BarrierFence.prefab", terrenoRaiz.transform, new Vector3(20f, 0f, 0f), new Vector3(0f, 90f, 0f));
-        InstanciarPropSegura("Assets/Mountain Terrain rocks and tree/Prefab/rock_set_04.prefab", terrenoRaiz.transform, new Vector3(15f, 0f, -20f), Vector3.zero);
-
-        // 4 Armadilhas
-        string[] prefabsTrap =
+        if (!AssetDatabase.CopyAsset(origemPath, config.CaminhoDestino))
         {
+            Debug.LogError($"[GeradorMenuECenas] Falha ao clonar '{origemPath}' para '{config.CaminhoDestino}'.");
+            return;
+        }
+
+        Scene cena = EditorSceneManager.OpenScene(config.CaminhoDestino, OpenSceneMode.Single);
+
+        LimparAtoresGameplayClonados();
+
+        Terrain terreno = Terrain.activeTerrain;
+        Vector3 tPos = terreno != null ? terreno.transform.position : Vector3.zero;
+        Vector3 tSize = (terreno != null && terreno.terrainData != null) ? terreno.terrainData.size : new Vector3(120f, 10f, 120f);
+
+        GameObject jogadorObj = LocalizarOuInstanciarJogador();
+        Vector3 posJogadorAtual = jogadorObj != null ? jogadorObj.transform.position : tPos + tSize * 0.5f;
+
+        float px = tSize.x > 0.01f ? Mathf.Clamp01((posJogadorAtual.x - tPos.x) / tSize.x) : 0.5f;
+        float pz = tSize.z > 0.01f ? Mathf.Clamp01((posJogadorAtual.z - tPos.z) / tSize.z) : 0.5f;
+
+        float comp = Mathf.Clamp(Mathf.Min(tSize.x, tSize.z) * 0.35f, 32f, 56f);
+        float margem = Mathf.Min(18f, Mathf.Min(tSize.x, tSize.z) * 0.12f);
+
+        Vector3 inicioZonaXZ;
+        Vector3 dir;
+        Vector3 direita;
+
+        if (!config.EhFase3)
+        {
+            float nx = px < 0.5f ? 0.72f : 0.28f;
+        inicioZonaXZ = new Vector3(tPos.x + tSize.x * nx, 0f, tPos.z + tSize.z * 0.25f);
+        dir = Vector3.forward;
+        direita = Vector3.right;
+    }
+        else
+        {
+float nz = pz < 0.5f ? 0.72f : 0.28f;
+inicioZonaXZ = new Vector3(tPos.x + tSize.x * 0.25f, 0f, tPos.z + tSize.z * nz);
+dir = Vector3.right;
+direita = Vector3.back;
+        }
+
+Vector3 inicioNoTerreno = PontoNoTerreno(terreno, inicioZonaXZ, margem, 0.08f);
+if (jogadorObj != null)
+{
+CharacterController cc = jogadorObj.GetComponent<CharacterController>();
+bool ccAtivo = cc != null && cc.enabled;
+if (ccAtivo) cc.enabled = false;
+
+jogadorObj.transform.SetPositionAndRotation(inicioNoTerreno, Quaternion.LookRotation(dir));
+
+if (ccAtivo) cc.enabled = true;
+        }
+
+Dictionary<string, Transform> raiz = CriarEstruturaRaiz(cena);
+if (jogadorObj != null && jogadorObj.transform.parent == null)
+    jogadorObj.transform.SetParent(raiz["PLAYER"], true);
+
+GarantirHudECamera(raiz, config.EhFase3);
+ConfigurarAtmosferaEMusica(raiz, config);
+
+// Props temáticos da nova zona sob TERRENO/Props_Fase
+Transform propsFase = ObterOuCriarFilho(raiz["TERRENO"], "Props_Fase");
+DistribuirPropsZona(config.EhFase3, propsFase, terreno, inicioNoTerreno, dir, direita, comp, margem);
+
+// Armadilhas na nova zona
+DistribuirArmadilhasZona(config.EhFase3, raiz["ARMADILHAS"], terreno, inicioNoTerreno, dir, direita, comp, margem);
+
+// Coletáveis na nova zona
+DistribuirColetaveisZona(config.EhFase3, raiz["COLETAVEIS"], terreno, inicioNoTerreno, dir, direita, comp, margem);
+
+// Inimigos na nova zona
+DistribuirInimigosZona(config.EhFase3, raiz["INIMIGOS"], terreno, inicioNoTerreno, dir, direita, comp, margem);
+
+// Objetivo de Relíquias + Portal no fim da zona
+ConfigurarObjetivoEPortal(raiz["SISTEMAS"], config, terreno, inicioNoTerreno, dir, comp, margem);
+
+// Salvar antes do bake evita janela manual da Unity para criar pasta de NavMesh
+bool salvouInicial = EditorSceneManager.SaveScene(cena, config.CaminhoDestino);
+if (!salvouInicial)
+Debug.LogError($"[GeradorMenuECenas] Falha ao salvar '{config.CaminhoDestino}' antes do bake do NavMesh.");
+
+Vector3 centroZona = PontoNoTerreno(terreno, inicioNoTerreno + dir * (comp * 0.5f), margem, 0f);
+GameObject navObj = new GameObject("NavMesh_Zona");
+navObj.transform.SetParent(raiz["SISTEMAS"], false);
+navObj.transform.position = centroZona;
+
+NavMeshSurface surface = navObj.AddComponent<NavMeshSurface>();
+surface.collectObjects = CollectObjects.Volume;
+surface.center = Vector3.zero;
+surface.size = new Vector3(comp + 45f, Mathf.Max(80f, tSize.y + 40f), comp + 45f);
+surface.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
+surface.BuildNavMesh();
+
+EditorSceneManager.SaveScene(cena, config.CaminhoDestino);
+    }
+
+    private static void LimparAtoresGameplayClonados()
+{
+    foreach (ItemColetavel c in UnityEngine.Object.FindObjectsByType<ItemColetavel>(FindObjectsSortMode.None))
+    {
+        if (c != null) UnityEngine.Object.DestroyImmediate(c.gameObject);
+    }
+
+        foreach (InimigoPerseguidor inimigo in UnityEngine.Object.FindObjectsByType<InimigoPerseguidor>(FindObjectsSortMode.None))
+        {
+            if (inimigo != null) UnityEngine.Object.DestroyImmediate(inimigo.gameObject);
+        }
+
+    foreach (Armadilha armadilha in UnityEngine.Object.FindObjectsByType<Armadilha>(FindObjectsSortMode.None))
+    {
+        if (armadilha != null) UnityEngine.Object.DestroyImmediate(armadilha.gameObject);
+    }
+
+    foreach (PortalProximaFase portal in UnityEngine.Object.FindObjectsByType<PortalProximaFase>(FindObjectsSortMode.None))
+    {
+        if (portal != null) UnityEngine.Object.DestroyImmediate(portal.gameObject);
+    }
+
+    foreach (NavMeshSurface surface in UnityEngine.Object.FindObjectsByType<NavMeshSurface>(FindObjectsSortMode.None))
+    {
+        if (surface != null) UnityEngine.Object.DestroyImmediate(surface);
+    }
+}
+
+private static GameObject LocalizarOuInstanciarJogador()
+{
+    GameObject jogadorObj = GameObject.FindWithTag("Player");
+    if (jogadorObj == null)
+    {
+        ControleJogador controle = UnityEngine.Object.FindFirstObjectByType<ControleJogador>();
+        if (controle != null)
+            jogadorObj = controle.gameObject;
+    }
+
+    if (jogadorObj == null)
+        jogadorObj = InstanciarPrefabSeExistir(PathPrefabJogador, Vector3.zero, "Prefab_Jogador");
+
+    return jogadorObj;
+}
+
+private static void GarantirHudECamera(Dictionary<string, Transform> raiz, bool ehFase3)
+{
+    if (UnityEngine.Object.FindFirstObjectByType<HUDInventario>() == null)
+    {
+        GameObject hudObj = InstanciarPrefabSeExistir(PathPrefabHud, Vector3.zero, "Prefab_HUD_Sistema");
+        ParentearSeNaoNulo(hudObj, raiz["HUD"]);
+    }
+
+    if (Camera.main == null)
+    {
+        GameObject camObj = InstanciarPrefabSeExistir(PathPrefabCamera, Vector3.zero, "Prefab_Camera");
+        ParentearSeNaoNulo(camObj, raiz["CAMERA"]);
+    }
+
+    if (ehFase3 && UnityEngine.Object.FindFirstObjectByType<TelaVitoriaUI>() == null)
+    {
+        GameObject vitoriaObj = InstanciarPrefabSeExistir(PathPrefabVitoria, Vector3.zero, "Prefab_TelaVitoria");
+        ParentearSeNaoNulo(vitoriaObj, raiz["HUD"]);
+    }
+}
+
+private static void ConfigurarAtmosferaEMusica(Dictionary<string, Transform> raiz, ConfigFaseMapa config)
+{
+    foreach (Light luz in UnityEngine.Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+    {
+        if (luz != null && luz.type == LightType.Directional)
+        {
+            luz.color = config.CorLuz;
+            luz.intensity = config.IntensidadeLuz;
+            luz.transform.rotation = Quaternion.Euler(config.RotacaoLuz);
+            break;
+        }
+    }
+
+    RenderSettings.fog = true;
+    RenderSettings.fogMode = FogMode.ExponentialSquared;
+    RenderSettings.fogColor = config.CorFog;
+    RenderSettings.fogDensity = config.DensidadeFog;
+
+    AudioSource musicaExistente = null;
+    foreach (AudioSource src in UnityEngine.Object.FindObjectsByType<AudioSource>(FindObjectsSortMode.None))
+    {
+        if (src != null && src.loop && src.GetComponentInParent<ControleJogador>() == null)
+        {
+            musicaExistente = src;
+            break;
+        }
+    }
+
+    if (musicaExistente != null)
+    {
+        DefinirClipAudio(musicaExistente.gameObject, config.CaminhoMusica);
+    }
+    else
+    {
+        GameObject bgmObj = InstanciarPrefabSeExistir(PathPrefabMusica, Vector3.zero, "Prefab_MusicaFundo");
+        DefinirClipAudio(bgmObj, config.CaminhoMusica);
+        ParentearSeNaoNulo(bgmObj, raiz["AUDIO"]);
+    }
+}
+
+private static void DistribuirPropsZona(
+    bool ehFase3,
+    Transform paiProps,
+    Terrain terreno,
+    Vector3 inicio,
+    Vector3 dir,
+    Vector3 direita,
+    float comp,
+    float margem)
+{
+    if (!ehFase3)
+    {
+        InstanciarPropNoTerreno("Assets/Mountain Terrain rocks and tree/Prefab/rock_set_01.prefab", paiProps, terreno, inicio + dir * (comp * 0.25f) - direita * 11f, new Vector3(0f, 35f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Mountain Terrain rocks and tree/Prefab/rock_set_02.prefab", paiProps, terreno, inicio + dir * (comp * 0.55f) + direita * 11f, new Vector3(0f, -45f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Mountain Terrain rocks and tree/Prefab/rock_set_03.prefab", paiProps, terreno, inicio + dir * (comp * 0.85f) - direita * 10f, new Vector3(0f, 90f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Assets_FenceChained/prefabs/chainlink_group-1.prefab", paiProps, terreno, inicio + dir * (comp * 0.45f) - direita * 14f, Quaternion.LookRotation(dir).eulerAngles, margem);
+        InstanciarPropNoTerreno("Assets/Assets_FenceChained/prefabs/chainlink_group-1.prefab", paiProps, terreno, inicio + dir * (comp * 0.45f) + direita * 14f, Quaternion.LookRotation(dir).eulerAngles, margem);
+    }
+    else
+    {
+        InstanciarPropNoTerreno("Assets/Damaged Models pack1/Prefabs/trolleybus_dmg (1).prefab", paiProps, terreno, inicio + dir * (comp * 0.30f) - direita * 10f, new Vector3(0f, 25f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Damaged Models pack1/Prefabs/kiosk_dmg.prefab", paiProps, terreno, inicio + dir * (comp * 0.55f) + direita * 10f, new Vector3(0f, -35f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Damaged Models pack1/Prefabs/lamppost.prefab", paiProps, terreno, inicio + dir * (comp * 0.70f) - direita * 8f, Vector3.zero, margem);
+        InstanciarPropNoTerreno("Assets/Damaged Models pack1/Prefabs/sign_dmg.prefab", paiProps, terreno, inicio + dir * (comp * 0.20f) + direita * 7f, new Vector3(0f, 140f, 0f), margem);
+        InstanciarPropNoTerreno("Assets/Road props for games/Prefabs/BarrierFence.prefab", paiProps, terreno, inicio + dir * (comp * 0.45f) - direita * 13f, Quaternion.LookRotation(dir).eulerAngles, margem);
+        InstanciarPropNoTerreno("Assets/Road props for games/Prefabs/BarrierFence.prefab", paiProps, terreno, inicio + dir * (comp * 0.45f) + direita * 13f, Quaternion.LookRotation(dir).eulerAngles, margem);
+        InstanciarPropNoTerreno("Assets/Mountain Terrain rocks and tree/Prefab/rock_set_04.prefab", paiProps, terreno, inicio + dir * (comp * 0.85f) + direita * 11f, Vector3.zero, margem);
+    }
+}
+
+private static void DistribuirArmadilhasZona(
+    bool ehFase3,
+    Transform paiArmadilhas,
+    Terrain terreno,
+    Vector3 inicio,
+    Vector3 dir,
+    Vector3 direita,
+    float comp,
+    float margem)
+{
+    string[] prefabsTrap =
+    {
             "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Grid.prefab",
             "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Round.prefab",
             "Assets/Dungeon Floor Traps/Prefabs/PBR/Dungeon_Floor_Trap_Star.prefab"
         };
-        List<GameObject> armadilhas = new List<GameObject>
-        {
-            CriarArmadilha(prefabsTrap[0], new Vector3(-4f, 0.05f, -14f), 25f),
-            CriarArmadilha(prefabsTrap[1], new Vector3(5f, 0.05f, -2f), 25f),
-            CriarArmadilha(prefabsTrap[2], new Vector3(-5f, 0.05f, 12f), 30f),
-            CriarArmadilha(prefabsTrap[0], new Vector3(4f, 0.05f, 22f), 30f)
-        };
 
-        // Coletáveis (5 Relíquias, 8 Moedas, 3 Poções)
-        List<GameObject> coletaveis = new List<GameObject>();
-        Vector3[] posReliquias =
-        {
-            new Vector3(-10f, 0.85f, -18f),
-            new Vector3(10f, 0.85f, -8f),
-            new Vector3(0f, 0.85f, 4f),
-            new Vector3(-11f, 0.85f, 18f),
-            new Vector3(10f, 0.85f, 26f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Reliquia.prefab", posReliquias);
-
-        Vector3[] posMoedas =
-        {
-            new Vector3(0f, 0.85f, -22f),
-            new Vector3(-4f, 0.85f, -10f),
-            new Vector3(4f, 0.85f, -4f),
-            new Vector3(-4f, 0.85f, 6f),
-            new Vector3(4f, 0.85f, 12f),
-            new Vector3(-3f, 0.85f, 24f),
-            new Vector3(3f, 0.85f, 28f),
-            new Vector3(0f, 0.85f, 31f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Moeda.prefab", posMoedas);
-
-        Vector3[] posPocoes =
-        {
-            new Vector3(9f, 0.85f, -18f),
-            new Vector3(-8f, 0.85f, 6f),
-            new Vector3(8f, 0.85f, 18f)
-        };
-        AdicionarColetaveis(coletaveis, $"{PastaPrefabsColetaveis}/Coletavel_Pocao.prefab", posPocoes);
-
-        // 2 Inimigos
-        List<GameObject> inimigos = new List<GameObject>
-        {
-            CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin1.prefab", "Inimigo_Nave_Alfa", new Vector3(-6f, 0f, 10f)),
-            CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin3.prefab", "Inimigo_Nave_Omega", new Vector3(6f, 0f, 24f))
-        };
-
-        // Sistemas: Objetivo + Portal Final (Vitória)
-        GameObject objFase = CriarObjetoObjetivo(5);
-        GameObject portalObj = InstanciarPrefabSeExistir(PathPrefabPortal, new Vector3(0f, 0f, 36f), "Portal_Final_Tesouro");
-        ConfigurarPortal(portalObj, string.Empty, ehFinal: true, exigirReliquias: true);
-
-        NavMeshSurface surface = terrenoRaiz.AddComponent<NavMeshSurface>();
-        surface.collectObjects = CollectObjects.All;
-        surface.BuildNavMesh();
-
-        List<GameObject> hudObjs = new List<GameObject>();
-        if (hudObj != null) hudObjs.Add(hudObj);
-        if (vitoriaObj != null) hudObjs.Add(vitoriaObj);
-
-        List<GameObject> sistemas = new List<GameObject> { objFase, portalObj };
-        OrganizarCenaComSortify(cena, camObj, luz != null ? luz.gameObject : null, terrenoRaiz, jogadorObj, hudObjs, coletaveis, inimigos, armadilhas, sistemas, bgmObj);
-
-        EditorSceneManager.SaveScene(cena, PathCenaFase3);
+        if (!ehFase3)
+    {
+    CriarArmadilha(prefabsTrap[0], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.24f), margem, 0.05f), 20f);
+    CriarArmadilha(prefabsTrap[1], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.50f) - direita * 4f, margem, 0.05f), 25f);
+    CriarArmadilha(prefabsTrap[2], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.74f) + direita * 4f, margem, 0.05f), 25f);
+}
+        else
+{
+    CriarArmadilha(prefabsTrap[0], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.20f) - direita * 3.5f, margem, 0.05f), 25f);
+    CriarArmadilha(prefabsTrap[1], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.42f) + direita * 4.0f, margem, 0.05f), 25f);
+    CriarArmadilha(prefabsTrap[2], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.64f) - direita * 4.0f, margem, 0.05f), 30f);
+    CriarArmadilha(prefabsTrap[0], paiArmadilhas, PontoNoTerreno(terreno, inicio + dir * (comp * 0.84f) + direita * 3.5f, margem, 0.05f), 30f);
+}
     }
 
-    private static int RegistrarCenasNoBuildSettings(bool silencioso)
+    private static void DistribuirColetaveisZona(
+        bool ehFase3,
+        Transform raizColetaveis,
+        Terrain terreno,
+        Vector3 inicio,
+        Vector3 dir,
+        Vector3 direita,
+        float comp,
+        float margem)
+{
+    Transform subMoedas = ObterOuCriarFilho(raizColetaveis, "_MOEDAS");
+    Transform subReliquias = ObterOuCriarFilho(raizColetaveis, "_RELIQUIAS");
+    Transform subPocoes = ObterOuCriarFilho(raizColetaveis, "_POCOES");
+
+    Vector3[] reliquias =
     {
-        string[] caminhosOficiais =
+            PontoNoTerreno(terreno, inicio + dir * (comp * 0.18f) - direita * 6.5f, margem, 0.85f),
+            PontoNoTerreno(terreno, inicio + dir * (comp * 0.36f) + direita * 6.5f, margem, 0.85f),
+            PontoNoTerreno(terreno, inicio + dir * (comp * 0.54f), margem, 0.85f),
+            PontoNoTerreno(terreno, inicio + dir * (comp * 0.72f) - direita * 7.0f, margem, 0.85f),
+            PontoNoTerreno(terreno, inicio + dir * (comp * 0.88f) + direita * 6.0f, margem, 0.85f)
+        };
+    InstanciarColetaveisNoGrupo($"{PastaPrefabsColetaveis}/Coletavel_Reliquia.prefab", subReliquias, reliquias);
+
+    int qtdMoedas = ehFase3 ? 8 : 6;
+    Vector3[] moedas = new Vector3[qtdMoedas];
+    for (int i = 0; i < qtdMoedas; i++)
+    {
+    float t = Mathf.Lerp(0.12f, 0.92f, (float)i / Mathf.Max(1, qtdMoedas - 1));
+    float zig = (i % 2 == 0 ? 1f : -1f) * 2.5f;
+    moedas[i] = PontoNoTerreno(terreno, inicio + dir * (comp * t) + direita * zig, margem, 0.85f);
+}
+InstanciarColetaveisNoGrupo($"{PastaPrefabsColetaveis}/Coletavel_Moeda.prefab", subMoedas, moedas);
+
+Vector3[] pocoes = ehFase3
+            ? new[]
+            {
+                PontoNoTerreno(terreno, inicio + dir * (comp * 0.25f) + direita * 7.5f, margem, 0.85f),
+                PontoNoTerreno(terreno, inicio + dir * (comp * 0.58f) - direita * 7.5f, margem, 0.85f),
+                PontoNoTerreno(terreno, inicio + dir * (comp * 0.80f) + direita * 7.0f, margem, 0.85f)
+            }
+            : new[]
+            {
+                PontoNoTerreno(terreno, inicio + dir * (comp * 0.30f) + direita * 7.0f, margem, 0.85f),
+                PontoNoTerreno(terreno, inicio + dir * (comp * 0.68f) - direita * 7.0f, margem, 0.85f)
+            };
+InstanciarColetaveisNoGrupo($"{PastaPrefabsColetaveis}/Coletavel_Pocao.prefab", subPocoes, pocoes);
+    }
+
+    private static void DistribuirInimigosZona(
+        bool ehFase3,
+        Transform paiInimigos,
+        Terrain terreno,
+        Vector3 inicio,
+        Vector3 dir,
+        Vector3 direita,
+        float comp,
+        float margem)
+{
+    Quaternion olhandoParaInicio = Quaternion.LookRotation(-dir);
+
+    if (!ehFase3)
+    {
+    Vector3 pos = PontoNoTerreno(terreno, inicio + dir * (comp * 0.65f), margem, 0f);
+    CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin2.prefab", paiInimigos, "Inimigo_Guardiao_Ruinas", pos, olhandoParaInicio);
+}
+        else
+{
+    Vector3 pos1 = PontoNoTerreno(terreno, inicio + dir * (comp * 0.50f) - direita * 5f, margem, 0f);
+    Vector3 pos2 = PontoNoTerreno(terreno, inicio + dir * (comp * 0.80f) + direita * 5f, margem, 0f);
+    CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin1.prefab", paiInimigos, "Inimigo_Nave_Alfa", pos1, olhandoParaInicio);
+    CriarInimigoFase("Assets/SciFi Beast06 Bull/Prefab/SciFi Beast06 Bull Skin3.prefab", paiInimigos, "Inimigo_Nave_Omega", pos2, olhandoParaInicio);
+}
+    }
+
+    private static void ConfigurarObjetivoEPortal(
+        Transform paiSistemas,
+        ConfigFaseMapa config,
+        Terrain terreno,
+        Vector3 inicio,
+        Vector3 dir,
+        float comp,
+        float margem)
+{
+    ObjetivoReliquias objetivo = UnityEngine.Object.FindFirstObjectByType<ObjetivoReliquias>();
+    if (objetivo == null)
+    {
+    GameObject objFase = new GameObject("Objetivo_Fase");
+    objFase.transform.SetParent(paiSistemas, false);
+    objetivo = objFase.AddComponent<ObjetivoReliquias>();
+}
+
+SerializedObject soObj = new SerializedObject(objetivo);
+SerializedProperty propMeta = soObj.FindProperty("meta");
+if (propMeta != null)
+    propMeta.intValue = 5;
+soObj.ApplyModifiedProperties();
+
+Vector3 posPortal = PontoNoTerreno(terreno, inicio + dir * comp, margem, 0f);
+string nomePortal = config.PortalFinal ? "Portal_Final_Tesouro" : "Portal_Para_Fase3";
+GameObject portalObj = InstanciarPrefabSeExistir(PathPrefabPortal, posPortal, nomePortal);
+if (portalObj != null)
+{
+    portalObj.transform.rotation = Quaternion.LookRotation(-dir);
+    portalObj.transform.SetParent(paiSistemas, true);
+    ConfigurarPortal(portalObj, config.CenaDestinoPortal, config.PortalFinal, exigirReliquias: true);
+}
+    }
+
+private static Vector3 PontoNoTerreno(Terrain terreno, Vector3 posXZ, float margem, float offsetY)
+{
+    if (terreno == null || terreno.terrainData == null)
+        return new Vector3(posXZ.x, offsetY, posXZ.z);
+
+    Vector3 tPos = terreno.transform.position;
+    Vector3 tSize = terreno.terrainData.size;
+
+    float x = Mathf.Clamp(posXZ.x, tPos.x + margem, tPos.x + Mathf.Max(margem, tSize.x - margem));
+    float z = Mathf.Clamp(posXZ.z, tPos.z + margem, tPos.z + Mathf.Max(margem, tSize.z - margem));
+    Vector3 amostra = new Vector3(x, posXZ.y, z);
+    float y = terreno.SampleHeight(amostra) + tPos.y + offsetY;
+    return new Vector3(x, y, z);
+}
+
+private static void InstanciarPropNoTerreno(
+    string caminhoPrefab,
+    Transform pai,
+    Terrain terreno,
+    Vector3 posXZ,
+    Vector3 eulerRot,
+    float margem)
+{
+    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
+    if (prefab == null)
+        return;
+
+    GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+    if (instancia == null)
+        return;
+
+    instancia.transform.SetParent(pai, false);
+    instancia.transform.rotation = Quaternion.Euler(eulerRot);
+    instancia.transform.position = PontoNoTerreno(terreno, posXZ, margem, 0f);
+    AssentarPorBoundsNoTerreno(instancia, terreno, margem);
+}
+
+private static void AssentarPorBoundsNoTerreno(GameObject obj, Terrain terreno, float margem)
+{
+    if (obj == null)
+        return;
+
+    Vector3 posChao = PontoNoTerreno(terreno, obj.transform.position, margem, 0f);
+    Renderer[] renderers = obj.GetComponentsInChildren<Renderer>(false);
+    Bounds boundsCombinado = default;
+    bool temBounds = false;
+
+    foreach (Renderer r in renderers)
+    {
+        if (r == null || !r.enabled || r.bounds.size == Vector3.zero)
+            continue;
+
+        if (!temBounds)
         {
+            boundsCombinado = r.bounds;
+            temBounds = true;
+        }
+        else
+        {
+            boundsCombinado.Encapsulate(r.bounds);
+        }
+    }
+
+    if (temBounds)
+    {
+        float offsetPivot = obj.transform.position.y - boundsCombinado.min.y;
+        posChao.y += offsetPivot;
+    }
+
+    obj.transform.position = posChao;
+}
+
+private static int RegistrarCenasNoBuildSettings(bool silencioso)
+{
+    string[] caminhosOficiais =
+    {
             PathCenaMenu,
             PathCenaFase1,
             PathCenaFase2,
             PathCenaFase3
         };
 
-        List<EditorBuildSettingsScene> lista = new List<EditorBuildSettingsScene>();
-        List<string> faltantes = new List<string>();
+    List<EditorBuildSettingsScene> lista = new List<EditorBuildSettingsScene>();
+    List<string> faltantes = new List<string>();
 
-        foreach (string caminho in caminhosOficiais)
-        {
-            if (File.Exists(caminho))
-            {
-                lista.Add(new EditorBuildSettingsScene(caminho, true));
-            }
-            else
-            {
-                faltantes.Add(caminho);
-            }
-        }
-
-        EditorBuildSettings.scenes = lista.ToArray();
-
-        if (!silencioso)
-        {
-            string avisoFaltantes = faltantes.Count > 0
-                ? "\n\n⚠ Cenas ainda não encontradas no disco:\n- " + string.Join("\n- ", faltantes)
-                : string.Empty;
-
-            EditorUtility.DisplayDialog(
-                "Build Settings Atualizado",
-                $"Registradas {lista.Count}/4 cenas na ordem oficial (0..3) em ProjectSettings/EditorBuildSettings.asset." + avisoFaltantes,
-                "OK");
-        }
-
-        return lista.Count;
+    foreach (string caminho in caminhosOficiais)
+    {
+        if (File.Exists(caminho))
+            lista.Add(new EditorBuildSettingsScene(caminho, true));
+        else
+            faltantes.Add(caminho);
     }
 
-    private static void RemoverMainCameraPadrao()
+    EditorBuildSettings.scenes = lista.ToArray();
+
+    if (!silencioso)
     {
-        Camera[] cameras = UnityEngine.Object.FindObjectsByType<Camera>(FindObjectsSortMode.None);
-        foreach (Camera cam in cameras)
-        {
-            if (cam != null && cam.CompareTag("MainCamera"))
-                UnityEngine.Object.DestroyImmediate(cam.gameObject);
-        }
+        string avisoFaltantes = faltantes.Count > 0
+            ? "\n\n⚠ Cenas ainda não encontradas no disco:\n- " + string.Join("\n- ", faltantes)
+            : string.Empty;
+
+        EditorUtility.DisplayDialog(
+            "Build Settings Atualizado",
+            $"Registradas {lista.Count}/4 cenas na ordem oficial (0..3) em ProjectSettings/EditorBuildSettings.asset." + avisoFaltantes,
+            "OK");
     }
 
-    private static GameObject InstanciarPrefabSeExistir(string caminhoAsset, Vector3 pos, string nomeInstancia)
-    {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoAsset);
-        if (prefab == null)
-        {
-            Debug.LogWarning($"[GeradorMenuECenas] Prefab não encontrado em '{caminhoAsset}'.");
-            return null;
-        }
+    return lista.Count;
+}
 
+private static GameObject InstanciarPrefabSeExistir(string caminhoAsset, Vector3 pos, string nomeInstancia)
+{
+    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoAsset);
+    if (prefab == null)
+    {
+        Debug.LogWarning($"[GeradorMenuECenas] Prefab não encontrado em '{caminhoAsset}'.");
+        return null;
+    }
+
+    GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+    if (instancia != null)
+    {
+        instancia.name = nomeInstancia;
+        instancia.transform.position = pos;
+    }
+
+    return instancia;
+}
+
+private static void DefinirClipAudio(GameObject objAudio, string caminhoClip)
+{
+    if (objAudio == null || string.IsNullOrEmpty(caminhoClip))
+        return;
+
+    AudioSource src = objAudio.GetComponent<AudioSource>();
+    AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(caminhoClip);
+    if (src != null && clip != null)
+    {
+        src.clip = clip;
+        src.loop = true;
+        src.playOnAwake = true;
+        src.spatialBlend = 0f;
+        src.volume = 0.35f;
+    }
+}
+
+    private static void CriarArmadilha(string caminhoPrefab, Transform pai, Vector3 pos, float dano)
+{
+    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
+    GameObject trapObj;
+
+    if (prefab != null)
+    {
+        trapObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        trapObj.name = "Armadilha_Chao";
+    }
+    else
+    {
+        trapObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+        trapObj.name = "Armadilha_Chao";
+        trapObj.transform.localScale = new Vector3(2.2f, 0.1f, 2.2f);
+    }
+
+    trapObj.transform.SetParent(pai, false);
+    trapObj.transform.position = pos;
+
+    BoxCollider box = trapObj.GetComponent<BoxCollider>();
+    if (box == null)
+        box = trapObj.AddComponent<BoxCollider>();
+    box.isTrigger = true;
+    box.center = new Vector3(0f, 0.4f, 0f);
+    box.size = new Vector3(2.2f, 1.0f, 2.2f);
+
+    Armadilha armadilha = trapObj.GetComponent<Armadilha>() ?? trapObj.AddComponent<Armadilha>();
+    SerializedObject so = new SerializedObject(armadilha);
+    SerializedProperty propDano = so.FindProperty("dano");
+    if (propDano != null) propDano.floatValue = dano;
+
+    AudioClip somDano = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/SFX/SFX_Dano_Impacto.wav");
+    SerializedProperty propSom = so.FindProperty("somAtivacao");
+    if (propSom != null && somDano != null) propSom.objectReferenceValue = somDano;
+    so.ApplyModifiedProperties();
+}
+
+    private static void InstanciarColetaveisNoGrupo(string caminhoPrefab, Transform pai, Vector3[] posicoes)
+{
+    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
+    if (prefab == null)
+        return;
+
+    foreach (Vector3 pos in posicoes)
+    {
         GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
         if (instancia != null)
         {
-            instancia.name = nomeInstancia;
+            instancia.transform.SetParent(pai, true);
             instancia.transform.position = pos;
         }
-
-        return instancia;
     }
+}
 
-    private static void DefinirClipAudio(GameObject objAudio, string caminhoClip)
+    private static void CriarInimigoFase(string caminhoPrefab, Transform pai, string nome, Vector3 pos, Quaternion rotacao)
+{
+    GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
+    GameObject inimigoObj;
+
+    if (prefab != null)
     {
-        if (objAudio == null || string.IsNullOrEmpty(caminhoClip))
-            return;
+        inimigoObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+        inimigoObj.name = nome;
 
-        AudioSource src = objAudio.GetComponent<AudioSource>();
-        AudioClip clip = AssetDatabase.LoadAssetAtPath<AudioClip>(caminhoClip);
-        if (src != null && clip != null)
+        Animator anim = inimigoObj.GetComponentInChildren<Animator>();
+        if (anim != null && anim.avatar == null)
         {
-            src.clip = clip;
-            src.loop = true;
-            src.playOnAwake = true;
-            src.spatialBlend = 0f;
+            Avatar avatar = AssetDatabase.LoadAssetAtPath<Avatar>("Assets/SciFi Beast06 Bull/Mesh/SciFi Beast06 Bull Skin1.fbx");
+            if (avatar != null)
+                anim.avatar = avatar;
         }
     }
-
-    private static GameObject CriarArenaBase(string nomeChao, Vector3 escala, Material matSolo)
+    else
     {
-        GameObject chao = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        chao.name = nomeChao;
-        chao.transform.position = new Vector3(0f, -0.5f, 4f);
-        chao.transform.localScale = escala;
-        chao.isStatic = true;
-
-        Renderer r = chao.GetComponent<Renderer>();
-        if (r != null && matSolo != null)
-            r.sharedMaterial = matSolo;
-
-        return chao;
+        inimigoObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+        inimigoObj.name = nome;
     }
 
-    private static void InstanciarPropSegura(string caminhoPrefab, Transform pai, Vector3 pos, Vector3 eulerRot)
+    inimigoObj.transform.SetParent(pai, true);
+    inimigoObj.transform.SetPositionAndRotation(pos, rotacao);
+
+    NavMeshAgent agente = inimigoObj.GetComponent<NavMeshAgent>() ?? inimigoObj.AddComponent<NavMeshAgent>();
+    agente.speed = 3.5f;
+    agente.stoppingDistance = 1.2f;
+    agente.radius = 0.8f;
+    agente.height = 2.0f;
+
+    InimigoPerseguidor seguidor = inimigoObj.GetComponent<InimigoPerseguidor>() ?? inimigoObj.AddComponent<InimigoPerseguidor>();
+    AudioClip somAtaque = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/SFX/SFX_Ataque_Inimigo.wav");
+    if (somAtaque != null)
     {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
-        if (prefab == null)
-            return;
-
-        GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-        if (instancia == null)
-            return;
-
-        instancia.transform.SetParent(pai, false);
-        instancia.transform.position = pos;
-        instancia.transform.rotation = Quaternion.Euler(eulerRot);
-    }
-
-    private static GameObject CriarArmadilha(string caminhoPrefab, Vector3 pos, float dano)
-    {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
-        GameObject trapObj;
-
-        if (prefab != null)
+        SerializedObject so = new SerializedObject(seguidor);
+        SerializedProperty propSom = so.FindProperty("somAtaque");
+        if (propSom != null)
         {
-            trapObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            trapObj.name = "Armadilha_Chao";
-        }
-        else
-        {
-            trapObj = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            trapObj.name = "Armadilha_Chao";
-            trapObj.transform.localScale = new Vector3(2.2f, 0.1f, 2.2f);
-        }
-
-        trapObj.transform.position = pos;
-
-        BoxCollider box = trapObj.GetComponent<BoxCollider>();
-        if (box == null)
-            box = trapObj.AddComponent<BoxCollider>();
-        box.isTrigger = true;
-        box.center = new Vector3(0f, 0.4f, 0f);
-        box.size = new Vector3(2.2f, 1.0f, 2.2f);
-
-        Armadilha armadilha = trapObj.GetComponent<Armadilha>() ?? trapObj.AddComponent<Armadilha>();
-        SerializedObject so = new SerializedObject(armadilha);
-        SerializedProperty propDano = so.FindProperty("dano");
-        if (propDano != null) propDano.floatValue = dano;
-
-        AudioClip somDano = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/SFX/SFX_Dano_Impacto.wav");
-        SerializedProperty propSom = so.FindProperty("somAtivacao");
-        if (propSom != null && somDano != null) propSom.objectReferenceValue = somDano;
-        so.ApplyModifiedProperties();
-
-        return trapObj;
-    }
-
-    private static void AdicionarColetaveis(List<GameObject> destino, string caminhoPrefab, Vector3[] posicoes)
-    {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
-        if (prefab == null)
-            return;
-
-        foreach (Vector3 pos in posicoes)
-        {
-            GameObject instancia = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            if (instancia != null)
-            {
-                instancia.transform.position = pos;
-                destino.Add(instancia);
-            }
+            propSom.objectReferenceValue = somAtaque;
+            so.ApplyModifiedProperties();
         }
     }
+}
 
-    private static GameObject CriarInimigoFase(string caminhoPrefab, string nome, Vector3 pos)
-    {
-        GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(caminhoPrefab);
-        GameObject inimigoObj;
+private static void ConfigurarPortal(GameObject portalObj, string cenaDestino, bool ehFinal, bool exigirReliquias)
+{
+    if (portalObj == null)
+        return;
 
-        if (prefab != null)
+    PortalProximaFase portal = portalObj.GetComponent<PortalProximaFase>();
+    if (portal == null)
+        return;
+
+    SerializedObject so = new SerializedObject(portal);
+    so.FindProperty("nomeCenaDestino").stringValue = cenaDestino;
+    so.FindProperty("ehFinalDoJogo").boolValue = ehFinal;
+    so.FindProperty("exigirObjetivoReliquias").boolValue = exigirReliquias;
+    so.ApplyModifiedProperties();
+}
+
+    private static Dictionary<string, Transform> CriarEstruturaRaiz(Scene cena)
+{
+    string[] nomes = { "CAMERA", "LUZ", "TERRENO", "PLAYER", "HUD", "COLETAVEIS", "INIMIGOS", "ARMADILHAS", "SISTEMAS", "AUDIO" };
+    Dictionary<string, Transform> existente = new Dictionary<string, Transform>(StringComparer.Ordinal);
+
+        foreach (GameObject root in cena.GetRootGameObjects())
         {
-            inimigoObj = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
-            inimigoObj.name = nome;
-
-            Animator anim = inimigoObj.GetComponentInChildren<Animator>();
-            if (anim != null && anim.avatar == null)
-            {
-                Avatar avatar = AssetDatabase.LoadAssetAtPath<Avatar>("Assets/SciFi Beast06 Bull/Mesh/SciFi Beast06 Bull Skin1.fbx");
-                if (avatar != null)
-                    anim.avatar = avatar;
-            }
+            if (root != null && !existente.ContainsKey(root.name))
+                existente[root.name] = root.transform;
         }
-        else
-        {
-            inimigoObj = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            inimigoObj.name = nome;
-        }
-
-        inimigoObj.transform.position = pos;
-        inimigoObj.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
-
-        NavMeshAgent agente = inimigoObj.GetComponent<NavMeshAgent>() ?? inimigoObj.AddComponent<NavMeshAgent>();
-        agente.speed = 3.5f;
-        agente.stoppingDistance = 1.2f;
-        agente.radius = 0.8f;
-        agente.height = 2.0f;
-
-        InimigoPerseguidor seguidor = inimigoObj.GetComponent<InimigoPerseguidor>() ?? inimigoObj.AddComponent<InimigoPerseguidor>();
-        AudioClip somAtaque = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/SFX/SFX_Ataque_Inimigo.wav");
-        if (somAtaque != null)
-        {
-            SerializedObject so = new SerializedObject(seguidor);
-            SerializedProperty propSom = so.FindProperty("somAtaque");
-            if (propSom != null)
-            {
-                propSom.objectReferenceValue = somAtaque;
-                so.ApplyModifiedProperties();
-            }
-        }
-
-        return inimigoObj;
-    }
-
-    private static GameObject CriarObjetoObjetivo(int meta)
-    {
-        GameObject go = new GameObject("Objetivo_Fase");
-        ObjetivoReliquias objetivo = go.AddComponent<ObjetivoReliquias>();
-        SerializedObject so = new SerializedObject(objetivo);
-        SerializedProperty propMeta = so.FindProperty("meta");
-        if (propMeta != null)
-            propMeta.intValue = meta;
-        so.ApplyModifiedProperties();
-        return go;
-    }
-
-    private static void ConfigurarPortal(GameObject portalObj, string cenaDestino, bool ehFinal, bool exigirReliquias)
-    {
-        if (portalObj == null)
-            return;
-
-        PortalProximaFase portal = portalObj.GetComponent<PortalProximaFase>();
-        if (portal == null)
-            return;
-
-        SerializedObject so = new SerializedObject(portal);
-        so.FindProperty("nomeCenaDestino").stringValue = cenaDestino;
-        so.FindProperty("ehFinalDoJogo").boolValue = ehFinal;
-        so.FindProperty("exigirObjetivoReliquias").boolValue = exigirReliquias;
-        so.ApplyModifiedProperties();
-    }
-
-    private static void OrganizarCenaComSortify(
-        Scene cena,
-        GameObject camObj,
-        GameObject luzObj,
-        GameObject terrenoObj,
-        GameObject playerObj,
-        GameObject hudObj,
-        List<GameObject> coletaveis,
-        List<GameObject> inimigos,
-        List<GameObject> armadilhas,
-        GameObject sistemaObj,
-        GameObject audioObj)
-    {
-        List<GameObject> huds = hudObj != null ? new List<GameObject> { hudObj } : null;
-        List<GameObject> sistemas = sistemaObj != null ? new List<GameObject> { sistemaObj } : null;
-        OrganizarCenaComSortify(cena, camObj, luzObj, terrenoObj, playerObj, huds, coletaveis, inimigos, armadilhas, sistemas, audioObj);
-    }
-
-    private static void OrganizarCenaComSortify(
-        Scene cena,
-        GameObject camObj,
-        GameObject luzObj,
-        GameObject terrenoObj,
-        GameObject playerObj,
-        List<GameObject> huds,
-        List<GameObject> coletaveis,
-        List<GameObject> inimigos,
-        List<GameObject> armadilhas,
-        List<GameObject> sistemas,
-        GameObject audioObj)
-    {
-        string[] nomes = { "CAMERA", "LUZ", "TERRENO", "PLAYER", "HUD", "COLETAVEIS", "INIMIGOS", "ARMADILHAS", "SISTEMAS", "AUDIO" };
-        string[] cores = { "#BF4040", "#BFBF40", "#40BF40", "#4CB5FF", "#BF4040", "#E6A817", "#D93838", "#E66C2C", "#6B7A8F", "#2FA89B" };
 
         Dictionary<string, Transform> raiz = new Dictionary<string, Transform>(StringComparer.Ordinal);
-        for (int i = 0; i < nomes.Length; i++)
-        {
-            GameObject container = new GameObject(nomes[i]);
-            container.transform.SetSiblingIndex(i);
-            raiz[nomes[i]] = container.transform;
-#if SORTIFY
-            SortifyObjectManager.LoadDataIfNeeded(true);
-            if (ColorUtility.TryParseHtmlString(cores[i], out Color cor))
-                SortifyObjectManager.SaveColor(container, cor);
-            if (nomes[i] != "HUD")
-                SortifyObjectManager.SaveShowComponents(container, false);
-#endif
-        }
-
-        ParentearSeNaoNulo(camObj, raiz["CAMERA"]);
-        ParentearSeNaoNulo(luzObj, raiz["LUZ"]);
-        ParentearSeNaoNulo(terrenoObj, raiz["TERRENO"]);
-        ParentearSeNaoNulo(playerObj, raiz["PLAYER"]);
-        ParentearSeNaoNulo(audioObj, raiz["AUDIO"]);
-
-        ParentearLista(huds, raiz["HUD"]);
-        ParentearLista(inimigos, raiz["INIMIGOS"]);
-        ParentearLista(armadilhas, raiz["ARMADILHAS"]);
-        ParentearLista(sistemas, raiz["SISTEMAS"]);
-
-        if (coletaveis != null && coletaveis.Count > 0)
-        {
-            Transform subMoedas = CriarSubgrupo(raiz["COLETAVEIS"], "_MOEDAS", "#FFD700");
-            Transform subReliquias = CriarSubgrupo(raiz["COLETAVEIS"], "_RELIQUIAS", "#C978FF");
-            Transform subPocoes = CriarSubgrupo(raiz["COLETAVEIS"], "_POCOES", "#E64553");
-
-            foreach (GameObject c in coletaveis)
+    for (int i = 0; i < nomes.Length; i++)
+    {
+            if (!existente.TryGetValue(nomes[i], out Transform container) || container == null)
             {
-                if (c == null) continue;
-                ItemColetavel ic = c.GetComponent<ItemColetavel>();
-                Transform alvoPai = raiz["COLETAVEIS"];
-                if (ic != null && ic.Item != null)
-                {
-                    alvoPai = ic.Item.Tipo switch
-                    {
-                        TipoItem.Moeda => subMoedas,
-                        TipoItem.Reliquia => subReliquias,
-                        TipoItem.Consumivel => subPocoes,
-                        _ => raiz["COLETAVEIS"]
-                    };
-                }
-                c.transform.SetParent(alvoPai, true);
+                GameObject novo = new GameObject(nomes[i]);
+                container = novo.transform;
             }
-        }
+        container.SetSiblingIndex(i);
+        raiz[nomes[i]] = container;
     }
 
-    private static Transform CriarSubgrupo(Transform pai, string nome, string hexCor)
-    {
-        GameObject sub = new GameObject(nome);
-        sub.transform.SetParent(pai, false);
-#if SORTIFY
-        if (ColorUtility.TryParseHtmlString(hexCor, out Color cor))
-            SortifyObjectManager.SaveColor(sub, cor);
-        SortifyObjectManager.SaveShowComponents(sub, false);
-#endif
-        return sub.transform;
-    }
+    return raiz;
+}
 
-    private static void ParentearSeNaoNulo(GameObject obj, Transform pai)
-    {
-        if (obj != null && pai != null)
-            obj.transform.SetParent(pai, true);
-    }
+    private static Transform ObterOuCriarFilho(Transform pai, string nome)
+{
+    Transform existente = pai.Find(nome);
+    if (existente != null)
+        return existente;
 
-    private static void ParentearLista(List<GameObject> lista, Transform pai)
-    {
-        if (lista == null || pai == null)
-            return;
+    GameObject sub = new GameObject(nome);
+    sub.transform.SetParent(pai, false);
+    return sub.transform;
+}
 
-        foreach (GameObject obj in lista)
-        {
-            if (obj != null)
-                obj.transform.SetParent(pai, true);
-        }
-    }
+private static void ParentearSeNaoNulo(GameObject obj, Transform pai)
+{
+    if (obj != null && pai != null)
+        obj.transform.SetParent(pai, true);
+}
 
-    private static GameObject CriarPainelUI(Transform pai, string nome, Color cor)
-    {
-        GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(Image));
-        obj.layer = 5;
-        obj.transform.SetParent(pai, false);
-        Image img = obj.GetComponent<Image>();
-        img.color = cor;
-        return obj;
-    }
+private static GameObject CriarPainelUI(Transform pai, string nome, Color cor)
+{
+    GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(Image));
+    obj.layer = 5;
+    obj.transform.SetParent(pai, false);
+    Image img = obj.GetComponent<Image>();
+    img.color = cor;
+    return obj;
+}
 
-    private static TextMeshProUGUI CriarTextoUI(
-        Transform pai,
-        string nome,
-        string conteudo,
-        Vector2 pos,
-        Vector2 tamanho,
-        float fontSize,
-        FontStyles estilo,
-        Color cor)
-    {
-        GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(TextMeshProUGUI));
-        obj.layer = 5;
-        obj.transform.SetParent(pai, false);
+private static TextMeshProUGUI CriarTextoUI(
+    Transform pai,
+    string nome,
+    string conteudo,
+    Vector2 pos,
+    Vector2 tamanho,
+    float fontSize,
+    FontStyles estilo,
+    Color cor)
+{
+    GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(TextMeshProUGUI));
+    obj.layer = 5;
+    obj.transform.SetParent(pai, false);
 
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = tamanho;
-        rt.anchoredPosition = pos;
+    RectTransform rt = obj.GetComponent<RectTransform>();
+    rt.anchorMin = new Vector2(0.5f, 0.5f);
+    rt.anchorMax = new Vector2(0.5f, 0.5f);
+    rt.sizeDelta = tamanho;
+    rt.anchoredPosition = pos;
 
-        TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
-        tmp.text = conteudo;
-        tmp.fontSize = fontSize;
-        tmp.fontStyle = estilo;
-        tmp.color = cor;
-        tmp.alignment = TextAlignmentOptions.Center;
-        return tmp;
-    }
+    TextMeshProUGUI tmp = obj.GetComponent<TextMeshProUGUI>();
+    tmp.text = conteudo;
+    tmp.fontSize = fontSize;
+    tmp.fontStyle = estilo;
+    tmp.color = cor;
+    tmp.alignment = TextAlignmentOptions.Center;
+    return tmp;
+}
 
-    private static Button CriarBotaoUI(
-        Transform pai,
-        string nome,
-        string rotulo,
-        Vector2 pos,
-        Vector2 tamanho,
-        Color corFundo)
-    {
-        GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(Image), typeof(Button));
-        obj.layer = 5;
-        obj.transform.SetParent(pai, false);
+private static Button CriarBotaoUI(
+    Transform pai,
+    string nome,
+    string rotulo,
+    Vector2 pos,
+    Vector2 tamanho,
+    Color corFundo)
+{
+    GameObject obj = new GameObject(nome, typeof(RectTransform), typeof(Image), typeof(Button));
+    obj.layer = 5;
+    obj.transform.SetParent(pai, false);
 
-        RectTransform rt = obj.GetComponent<RectTransform>();
-        rt.anchorMin = new Vector2(0.5f, 0.5f);
-        rt.anchorMax = new Vector2(0.5f, 0.5f);
-        rt.sizeDelta = tamanho;
-        rt.anchoredPosition = pos;
+    RectTransform rt = obj.GetComponent<RectTransform>();
+    rt.anchorMin = new Vector2(0.5f, 0.5f);
+    rt.anchorMax = new Vector2(0.5f, 0.5f);
+    rt.sizeDelta = tamanho;
+    rt.anchoredPosition = pos;
 
-        Image img = obj.GetComponent<Image>();
-        img.color = corFundo;
+    Image img = obj.GetComponent<Image>();
+    img.color = corFundo;
 
-        Button btn = obj.GetComponent<Button>();
-        ColorBlock cb = btn.colors;
-        cb.normalColor = Color.white;
-        cb.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
-        cb.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
-        btn.colors = cb;
+    Button btn = obj.GetComponent<Button>();
+    ColorBlock cb = btn.colors;
+    cb.normalColor = Color.white;
+    cb.highlightedColor = new Color(1.1f, 1.1f, 1.1f, 1f);
+    cb.pressedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+    btn.colors = cb;
 
-        CriarTextoUI(obj.transform, "Texto", rotulo, Vector2.zero, tamanho, 22f, FontStyles.Bold, Color.white);
-        return btn;
-    }
+    CriarTextoUI(obj.transform, "Texto", rotulo, Vector2.zero, tamanho, 22f, FontStyles.Bold, Color.white);
+    return btn;
+}
 }

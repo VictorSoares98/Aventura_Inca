@@ -261,6 +261,12 @@
                 }
             ],
             "sceneName": "Cena_Coletaveis_Inventario"
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": ""
         }
     ]
 }
