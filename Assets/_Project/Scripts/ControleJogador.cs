@@ -23,8 +23,12 @@ public class ControleJogador : MonoBehaviour
     [Header("Áudio dos Passos")]
     [SerializeField] private AudioSource passosAudioSource;
     [SerializeField] private AudioClip[] passosAudioClips;
-    [SerializeField, Range(0f, 1f)] private float volumePassos = 0.85f;
-    [SerializeField, Min(0.15f)] private float intervaloPassoCaminhada = 0.46f;
+    [SerializeField, Range(0f, 1f)] private float volumePassos = 0.65f;
+    [SerializeField, Range(0f, 1f)] private float volumePassosCorrida = 0.95f;
+    [SerializeField, Range(0f, 1f)] private float volumeAterrissagem = 0.95f;
+    [SerializeField, Range(0f, 1f)] private float pesoMinimoAnimacaoPasso = 0.35f;
+    [SerializeField, Min(0.05f)] private float cooldownPassoCaminhada = 0.26f;
+    [SerializeField, Min(0.05f)] private float cooldownPassoCorrida = 0.16f;
 
     [Header("Movimento")]
     [SerializeField] private float velocidade = 3.0f;
@@ -48,7 +52,9 @@ public class ControleJogador : MonoBehaviour
     private float velocidadeAtual;
     private float velocidadeY;
     private bool estaNoChao;
-    private float cronometroPassoFallback;
+    private bool estaCorrendo;
+    private float ultimoTempoPasso = -10f;
+    private int ultimoIndicePasso = -1;
 
     private void Awake()
     {
@@ -159,7 +165,9 @@ public class ControleJogador : MonoBehaviour
             );
         }
 
-        // Verifica o contato com o chão
+        // Verifica o contato com o chão preservando o estado anterior para detectar aterrissagem
+        bool estavaNoChao = estaNoChao;
+        float velocidadeYAnterior = velocidadeY;
         estaNoChao = character.isGrounded;
 
         if (estaNoChao && velocidadeY < 0f)
@@ -186,6 +194,8 @@ public class ControleJogador : MonoBehaviour
             Input.GetKey(KeyCode.LeftShift) &&
             temMovimento &&
             inputDirecional.y > 0.1f;
+
+        estaCorrendo = correndo;
 
         float velocidadeAlvo = correndo
             ? velocidadeCorrida
@@ -221,47 +231,55 @@ public class ControleJogador : MonoBehaviour
 
         character.Move(movimentoFinal * Time.deltaTime);
 
-        // Atualiza estado do chão
+        // Atualiza estado do chão e dispara som de aterrissagem após pulo/queda
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
 
-        // Fallback para clipes de caminhada sem Animation Event 'Passos'
-        if (estaNoChao && velocidadeAtual > 0.35f && !correndo)
-        {
-            cronometroPassoFallback -= Time.deltaTime;
-            if (cronometroPassoFallback <= 0f)
+            if (!estavaNoChao && estaNoChao && velocidadeYAnterior <= -3.0f)
             {
-                Passos();
-                cronometroPassoFallback = intervaloPassoCaminhada;
+                TocarPasso(volumeAterrissagem, Random.Range(0.84f, 0.90f));
             }
-        }
-        else
-        {
-            cronometroPassoFallback = 0.12f;
-        }
     }
 
-    // Áudio dos passos
-    private void Passos()
+    // Áudio dos passos chamado pelos Animation Events dos clipes de caminhada e corrida
+    private void Passos(AnimationEvent evt)
     {
         if (!estaNoChao || velocidadeAtual < 0.2f)
             return;
 
-        cronometroPassoFallback = intervaloPassoCaminhada;
+        // Ignora clipes secundários com baixo peso durante misturas do Blend Tree
+        if (evt != null && evt.animatorClipInfo.weight < pesoMinimoAnimacaoPasso)
+            return;
 
-        if (passosAudioSource != null &&
-            passosAudioClips != null &&
-            passosAudioClips.Length > 0)
+            float cooldown = estaCorrendo ? cooldownPassoCorrida : cooldownPassoCaminhada;
+            if (Time.time - ultimoTempoPasso < cooldown)
+                return;
+
+            float volume = estaCorrendo ? volumePassosCorrida : volumePassos;
+            float pitch = estaCorrendo ? Random.Range(1.00f, 1.10f) : Random.Range(0.94f, 1.04f);
+            TocarPasso(volume, pitch);
+        }
+
+    private void TocarPasso(float volume, float pitch)
+    {
+        if (passosAudioSource == null ||
+            passosAudioClips == null ||
+            passosAudioClips.Length == 0)
+            return;
+
+        int index = Random.Range(0, passosAudioClips.Length);
+        if (passosAudioClips.Length > 1 && index == ultimoIndicePasso)
         {
-            int index = Random.Range(0, passosAudioClips.Length);
+            index = (index + Random.Range(1, passosAudioClips.Length)) % passosAudioClips.Length;
+        }
 
-            AudioClip clip = passosAudioClips[index];
-
-            if (clip != null)
-            {
-                passosAudioSource.pitch = Random.Range(0.93f, 1.07f);
-                passosAudioSource.PlayOneShot(clip, volumePassos);
-            }
+        AudioClip clip = passosAudioClips[index];
+        if (clip != null)
+        {
+            ultimoIndicePasso = index;
+            ultimoTempoPasso = Time.time;
+            passosAudioSource.pitch = pitch;
+            passosAudioSource.PlayOneShot(clip, volume);
         }
     }
 

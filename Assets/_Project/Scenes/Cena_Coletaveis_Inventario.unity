@@ -2837,8 +2837,10 @@ MonoBehaviour:
   - {fileID: 8300000, guid: bda40fa9fe711bc479ed57860a9caaa7, type: 3}
   - {fileID: 8300000, guid: 2fe3cbb23b5d6bc45924cf95c7dd9dcb, type: 3}
   - {fileID: 8300000, guid: 7a64fcaf08a3d9c499e7d7f9b1116634, type: 3}
-  volumePassos: 0.85
-  intervaloPassoCaminhada: 0.46
+  - {fileID: 8300000, guid: 843a5991555e94349a2d255aa05e40ea, type: 3}
+  - {fileID: 8300000, guid: 8226e900045ced445a511aa8b2c58797, type: 3}
+  - {fileID: 8300000, guid: 3811ffdff0c104b4a8132838531a524f, type: 3}
+  volumePassos: 0.65
   velocidade: 3
   velocidadeRotacao: 15
   aceleracao: 10
