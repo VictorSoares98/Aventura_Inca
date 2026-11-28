@@ -22,6 +22,8 @@ public class ObjetivoReliquias : MonoBehaviour
 
     private void OnEnable()
     {
+        GarantirInventario();
+
         if (inventario == null)
         {
             Debug.LogError("[ObjetivoReliquias] Inventario reference is missing.", this);
@@ -40,7 +42,15 @@ public class ObjetivoReliquias : MonoBehaviour
 
     private void Start()
     {
-        Avaliar();
+        GarantirInventario();
+        if (inventario != null)
+            Avaliar();
+    }
+
+    private void GarantirInventario()
+    {
+        if (inventario == null)
+            inventario = FindFirstObjectByType<Inventario>();
     }
 
     private void Avaliar()

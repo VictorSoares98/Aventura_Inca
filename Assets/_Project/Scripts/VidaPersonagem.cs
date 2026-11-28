@@ -23,7 +23,10 @@ public class VidaPersonagem : MonoBehaviour
 
     public bool EstaMorto => estaMorto;
     public bool EstaComVidaCheia => vidaAtual >= vidaMaxima;
+    public float VidaAtual => vidaAtual;
+    public float VidaMaxima => vidaMaxima;
 
+    public static event System.Action<float, float> AoVidaMudar;
     public static event System.Action AoJogadorMorrer;
     public static event System.Action AoJogadorRenascer;
 
@@ -102,6 +105,8 @@ public class VidaPersonagem : MonoBehaviour
         {
             textoVida.text = $"{Mathf.CeilToInt(vidaAtual)} / {Mathf.CeilToInt(vidaMaxima)} HP";
         }
+
+        AoVidaMudar?.Invoke(vidaAtual, vidaMaxima);
     }
 
     private void Morrer()

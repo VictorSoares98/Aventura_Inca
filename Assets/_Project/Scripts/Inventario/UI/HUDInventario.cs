@@ -22,53 +22,92 @@ public class HUDInventario : MonoBehaviour
 
     private ItemColetavel coletavelEmFoco;
     private Coroutine rotinaNotificacao;
+    private bool inscritoInventario;
+    private bool inscritoObjetivo;
+    private bool inscritoEventosGlobais;
 
     private void OnEnable()
     {
-        if (inventario == null)
-        {
-            Debug.LogError("[HUDInventario] Inventario reference is missing.", this);
-            enabled = false;
-            return;
-        }
-
-        inventario.AoMudar += AtualizarContadores;
-        inventario.AoItemAdicionado += MostrarNotificacao;
-
-        if (objetivo != null)
-            objetivo.AoProgresso += AtualizarReliquias;
-
-        ItemColetavel.AoEntrarAlcance += MostrarAviso;
-        ItemColetavel.AoSairAlcance += EsconderAviso;
-
-        VidaPersonagem.AoJogadorMorrer += ExibirMorte;
-        VidaPersonagem.AoJogadorRenascer += EsconderMorte;
+        GarantirReferencias();
+        InscreverEventos();
     }
 
     private void OnDisable()
     {
-        if (inventario != null)
-        {
-            inventario.AoMudar -= AtualizarContadores;
-            inventario.AoItemAdicionado -= MostrarNotificacao;
-        }
-
-        if (objetivo != null)
-            objetivo.AoProgresso -= AtualizarReliquias;
-
-        ItemColetavel.AoEntrarAlcance -= MostrarAviso;
-        ItemColetavel.AoSairAlcance -= EsconderAviso;
-
-        VidaPersonagem.AoJogadorMorrer -= ExibirMorte;
-        VidaPersonagem.AoJogadorRenascer -= EsconderMorte;
+        DesinscreverEventos();
     }
 
     private void Start()
     {
+        GarantirReferencias();
+        InscreverEventos();
+
+        if (inventario == null)
+            Debug.LogError("[HUDInventario] Inventario reference is missing.", this);
+
         if (painelAviso != null) painelAviso.SetActive(false);
         if (textoNotificacao != null) textoNotificacao.text = string.Empty;
 
         AtualizarContadores();
+    }
+
+    private void GarantirReferencias()
+    {
+        if (inventario == null)
+            inventario = FindFirstObjectByType<Inventario>();
+
+        if (objetivo == null)
+            objetivo = FindFirstObjectByType<ObjetivoReliquias>();
+    }
+
+    private void InscreverEventos()
+    {
+        if (inventario != null && !inscritoInventario)
+        {
+            inventario.AoMudar += AtualizarContadores;
+            inventario.AoItemAdicionado += MostrarNotificacao;
+            inscritoInventario = true;
+        }
+
+        if (objetivo != null && !inscritoObjetivo)
+        {
+            objetivo.AoProgresso += AtualizarReliquias;
+            inscritoObjetivo = true;
+        }
+
+        if (!inscritoEventosGlobais)
+        {
+            ItemColetavel.AoEntrarAlcance += MostrarAviso;
+            ItemColetavel.AoSairAlcance += EsconderAviso;
+            VidaPersonagem.AoJogadorMorrer += ExibirMorte;
+            VidaPersonagem.AoJogadorRenascer += EsconderMorte;
+            inscritoEventosGlobais = true;
+        }
+    }
+
+    private void DesinscreverEventos()
+    {
+        if (inventario != null && inscritoInventario)
+        {
+            inventario.AoMudar -= AtualizarContadores;
+            inventario.AoItemAdicionado -= MostrarNotificacao;
+            inscritoInventario = false;
+        }
+
+        if (objetivo != null && inscritoObjetivo)
+        {
+            objetivo.AoProgresso -= AtualizarReliquias;
+            inscritoObjetivo = false;
+        }
+
+        if (inscritoEventosGlobais)
+        {
+            ItemColetavel.AoEntrarAlcance -= MostrarAviso;
+            ItemColetavel.AoSairAlcance -= EsconderAviso;
+            VidaPersonagem.AoJogadorMorrer -= ExibirMorte;
+            VidaPersonagem.AoJogadorRenascer -= EsconderMorte;
+            inscritoEventosGlobais = false;
+        }
     }
 
     private void AtualizarContadores()

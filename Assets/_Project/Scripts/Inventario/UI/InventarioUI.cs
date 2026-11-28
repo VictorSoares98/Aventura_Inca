@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TMPro;
+using Unity.Cinemachine;
 using UnityEngine;
 
 public class InventarioUI : MonoBehaviour
@@ -23,11 +24,15 @@ public class InventarioUI : MonoBehaviour
     private readonly List<SlotUI> slotsUI = new List<SlotUI>();
     private readonly Dictionary<Behaviour, bool> estadoAnterior = new Dictionary<Behaviour, bool>();
     private float escalaTempoAnterior = 1f;
+    private bool inscritoInventario;
 
     public bool EstaAberto => painel != null && painel.activeSelf;
 
     private void Awake()
     {
+        if (inventario == null)
+            inventario = FindFirstObjectByType<Inventario>();
+
         if (inventario == null || painel == null || contenedorSlots == null || prefabSlot == null)
         {
             Debug.LogError("[InventarioUI] Missing references (inventario, painel, contenedorSlots or prefabSlot).", this);
@@ -35,6 +40,7 @@ public class InventarioUI : MonoBehaviour
             return;
         }
 
+        GarantirComponentesBloqueados();
         CriarSlots();
         painel.SetActive(false);
         ExibirDetalhes(null);
@@ -42,17 +48,44 @@ public class InventarioUI : MonoBehaviour
 
     private void OnEnable()
     {
-        if (inventario != null)
+            if (inventario == null)
+                inventario = FindFirstObjectByType<Inventario>();
+
+        if (inventario != null && !inscritoInventario)
+        {
             inventario.AoMudar += Atualizar;
+            inscritoInventario = true;
+        }
     }
 
     private void OnDisable()
     {
-        if (inventario != null)
-            inventario.AoMudar -= Atualizar;
+            if (inventario != null && inscritoInventario)
+            {
+                inventario.AoMudar -= Atualizar;
+                inscritoInventario = false;
+            }
 
         if (EstaAberto)
             Fechar();
+    }
+
+    private void GarantirComponentesBloqueados()
+    {
+        if (componentesBloqueados != null && componentesBloqueados.Length > 0)
+            return;
+
+        List<Behaviour> lista = new List<Behaviour>();
+
+        ControleJogador controle = FindFirstObjectByType<ControleJogador>();
+        if (controle != null)
+            lista.Add(controle);
+
+        CinemachineInputAxisController camInput = FindFirstObjectByType<CinemachineInputAxisController>();
+        if (camInput != null)
+            lista.Add(camInput);
+
+        componentesBloqueados = lista.ToArray();
     }
 
     private void Update()
@@ -109,6 +142,7 @@ public class InventarioUI : MonoBehaviour
 
     public void Abrir()
     {
+        GarantirComponentesBloqueados();
         painel.SetActive(true);
         Atualizar();
 
