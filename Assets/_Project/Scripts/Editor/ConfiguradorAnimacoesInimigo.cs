@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using Unity.AI.Navigation;
 using UnityEditor;
@@ -225,13 +226,20 @@ public static class ConfiguradorAnimacoesInimigo
         agente.acceleration = 14.0f;
         agente.angularSpeed = 240.0f;
 
-        // 3. Colisor de Combate
+        // 3. Colisor de Combate Sólido (Impede que o CharacterController atravesse o corpo)
         CapsuleCollider col = instancia.GetComponent<CapsuleCollider>();
         if (col == null) col = instancia.AddComponent<CapsuleCollider>();
-        col.center = new Vector3(0f, 1.0f, 0f);
-        col.radius = 1.0f;
-        col.height = 2.0f;
-        col.isTrigger = true;
+        col.center = new Vector3(0f, 1.1f, 0f);
+        col.radius = 0.95f;
+        col.height = 2.2f;
+        col.isTrigger = false;
+
+        // 3.1 Rigidbody Cinemático para interação física com o CharacterController
+        Rigidbody rb = instancia.GetComponent<Rigidbody>();
+        if (rb == null) rb = instancia.AddComponent<Rigidbody>();
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
 
         // 4. InimigoPerseguidor
         InimigoPerseguidor perseguidor = instancia.GetComponent<InimigoPerseguidor>();
@@ -325,5 +333,124 @@ public static class ConfiguradorAnimacoesInimigo
         EditorSceneManager.SaveScene(novaCena, PathCenaTeste);
         Debug.Log($"[ConfiguradorAnimacoesInimigo] Cena de teste criada e salva em: {PathCenaTeste}");
         return true;
+    }
+
+    [MenuItem("Aventura Inca/IA e Inimigos/2. Propagar Prefab do Beast para Todas as Fases (1 Clique)", false, 21)]
+    public static void PropagarPrefabParaTodasAsFases()
+    {
+        // 1. Garante que o Prefab atualizado existe
+        GameObject prefabInimigo = AssetDatabase.LoadAssetAtPath<GameObject>(PathPrefabInimigo);
+        if (prefabInimigo == null)
+        {
+            GerarPrefabInimigo();
+            prefabInimigo = AssetDatabase.LoadAssetAtPath<GameObject>(PathPrefabInimigo);
+            if (prefabInimigo == null)
+            {
+                Debug.LogError("[ConfiguradorAnimacoesInimigo] Falha ao carregar ou gerar Prefab_Inimigo_Beast.");
+                return;
+            }
+        }
+
+        string cenaOriginalPath = SceneManager.GetActiveScene().path;
+        EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo();
+
+        string[] caminhosCenas = new string[]
+        {
+            "Assets/_Project/Scenes/Cena_principal.unity",
+            "Assets/_Project/Scenes/Cena_Fase2_Ruinas.unity",
+            "Assets/_Project/Scenes/Cena_Fase3_Nave.unity",
+            "Assets/_Project/Scenes/Cena_Coletaveis_Inventario.unity"
+        };
+
+        int totalSubstituidos = 0;
+        int cenasModificadas = 0;
+
+        try
+        {
+            for (int i = 0; i < caminhosCenas.Length; i++)
+            {
+                string path = caminhosCenas[i];
+                if (!File.Exists(path)) continue;
+
+                if (!Application.isBatchMode)
+                    EditorUtility.DisplayProgressBar("Aventura Inca", $"Atualizando inimigos em: {Path.GetFileName(path)}", (float)i / caminhosCenas.Length);
+
+                Scene cena = EditorSceneManager.OpenScene(path, OpenSceneMode.Single);
+                if (!cena.IsValid()) continue;
+
+                GameObject[] raizes = cena.GetRootGameObjects();
+                List<GameObject> inimigosAntigos = new List<GameObject>();
+
+                foreach (GameObject raiz in raizes)
+                {
+                    InimigoPerseguidor[] comps = raiz.GetComponentsInChildren<InimigoPerseguidor>(true);
+                    foreach (InimigoPerseguidor comp in comps)
+                    {
+                        if (comp != null && !inimigosAntigos.Contains(comp.gameObject))
+                        {
+                            inimigosAntigos.Add(comp.gameObject);
+                        }
+                    }
+                }
+
+                if (inimigosAntigos.Count > 0)
+                {
+                    cenasModificadas++;
+                    foreach (GameObject antigo in inimigosAntigos)
+                    {
+                        string nomeOriginal = antigo.name;
+                        Vector3 posOriginal = antigo.transform.position;
+                        Quaternion rotOriginal = antigo.transform.rotation;
+                        Vector3 escalaOriginal = antigo.transform.localScale;
+                        Transform paiOriginal = antigo.transform.parent;
+                        int siblingOriginal = antigo.transform.GetSiblingIndex();
+
+                        GameObject novo = PrefabUtility.InstantiatePrefab(prefabInimigo, cena) as GameObject;
+                        if (novo != null)
+                        {
+                            novo.name = nomeOriginal;
+                            novo.transform.SetParent(paiOriginal, false);
+                            novo.transform.position = posOriginal;
+                            novo.transform.rotation = rotOriginal;
+                            novo.transform.localScale = escalaOriginal;
+                            novo.transform.SetSiblingIndex(siblingOriginal);
+
+                            Object.DestroyImmediate(antigo);
+                            totalSubstituidos++;
+                        }
+                    }
+
+                    EditorSceneManager.MarkSceneDirty(cena);
+                    EditorSceneManager.SaveScene(cena);
+                    Debug.Log($"[ConfiguradorAnimacoesInimigo] {inimigosAntigos.Count} inimigos substituídos com sucesso em: {path}");
+                }
+            }
+        }
+        finally
+        {
+            if (!Application.isBatchMode)
+                EditorUtility.ClearProgressBar();
+
+            // Retorna o usuário para a cena de onde ele acionou o comando
+            if (!string.IsNullOrEmpty(cenaOriginalPath) && File.Exists(cenaOriginalPath))
+            {
+                EditorSceneManager.OpenScene(cenaOriginalPath, OpenSceneMode.Single);
+            }
+        }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
+
+        if (!Application.isBatchMode)
+        {
+            EditorUtility.DisplayDialog("Propagação Concluída!",
+                $"A atualização dos inimigos foi propagada com sucesso:\n\n" +
+                $"✔ Total de {totalSubstituidos} inimigos convertidos para o Prefab_Inimigo_Beast padronizado.\n" +
+                $"✔ {cenasModificadas} fases atualizadas e salvas.\n" +
+                $"✔ Colisores sólidos, Rigidbody cinemático e parâmetros anti-sobreposição aplicados a todos.\n\n" +
+                "Você já pode testar qualquer fase!", "Excelente!");
+        }
+
+        Debug.Log($"[ConfiguradorAnimacoesInimigo] Propagação concluída: {totalSubstituidos} inimigos em {cenasModificadas} cenas.");
     }
 }

@@ -60,6 +60,12 @@ public class InimigoPerseguidor : MonoBehaviour
 
     private void Awake()
     {
+        // Salvaguarda de alcance para instâncias em cenas antigas
+        if (distanciaAtaque < 3.0f)
+        {
+            distanciaAtaque = 3.2f;
+        }
+
         agente = GetComponent<NavMeshAgent>();
         if (agente != null)
         {
@@ -78,7 +84,7 @@ public class InimigoPerseguidor : MonoBehaviour
             animator.applyRootMotion = false;
         }
 
-        GarantirColisorTrigger();
+        ConfigurarColisorFisico();
         cronometroEspera = tempoEsperaInicial;
     }
 
@@ -103,27 +109,42 @@ public class InimigoPerseguidor : MonoBehaviour
         }
     }
 
-    private void GarantirColisorTrigger()
+    /// <summary>
+    /// Configura colisor SÓLIDO e Rigidbody cinemático.
+    /// Isso impede que o CharacterController do jogador atravesse o corpo da besta.
+    /// </summary>
+    private void ConfigurarColisorFisico()
     {
         Collider col = GetComponent<Collider>();
         if (col == null)
         {
             CapsuleCollider cap = gameObject.AddComponent<CapsuleCollider>();
-            cap.center = new Vector3(0f, 1f, 0f);
-            cap.radius = 1.0f;
-            cap.height = 2.0f;
-            cap.isTrigger = true;
+            cap.center = new Vector3(0f, 1.1f, 0f);
+            cap.radius = 0.95f;
+            cap.height = 2.2f;
+            cap.isTrigger = false;
         }
         else
         {
-            col.isTrigger = true;
+            col.isTrigger = false;
             if (col is CapsuleCollider capCol)
             {
-                capCol.center = new Vector3(0f, 1f, 0f);
-                capCol.radius = 1.0f;
-                capCol.height = 2.0f;
+                capCol.center = new Vector3(0f, 1.1f, 0f);
+                capCol.radius = 0.95f;
+                capCol.height = 2.2f;
             }
         }
+
+        // Rigidbody cinemático para que o PhysX impeça a penetração do CharacterController
+        // sem causar interferência na navegação do NavMeshAgent
+        Rigidbody rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            rb = gameObject.AddComponent<Rigidbody>();
+        }
+        rb.isKinematic = true;
+        rb.useGravity = false;
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     private void LocalizarJogadorSeNecessario()
