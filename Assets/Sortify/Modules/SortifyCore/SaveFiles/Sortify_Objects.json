@@ -143,6 +143,38 @@
                 {
                     "objID": "Cena_Coletaveis_Inventario_HUD_4",
                     "colorValue": "BF4040FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_COLETAVEIS_5",
+                    "colorValue": "E6A817FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_INIMIGOS_6",
+                    "colorValue": "D93838FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_ARMADILHAS_7",
+                    "colorValue": "E66C2CFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_SISTEMAS_8",
+                    "colorValue": "6B7A8FFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_AUDIO_9",
+                    "colorValue": "2FA89BFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__MOEDAS_0_COLETAVEIS_5",
+                    "colorValue": "FFD700FF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__RELIQUIAS_1_COLETAVEIS_5",
+                    "colorValue": "C978FFFF"
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__POCOES_2_COLETAVEIS_5",
+                    "colorValue": "E64553FF"
                 }
             ],
             "styles": [],
@@ -185,6 +217,42 @@
                 },
                 {
                     "objID": "Cena_Coletaveis_Inventario__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_INIMIGOS_6",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_ARMADILHAS_7",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_SISTEMAS_8",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_AUDIO_9",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__MOEDAS_0_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__RELIQUIAS_1_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario__POCOES_2_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_Coletaveis_Inventario_HUD_4",
                     "show": false
                 }
             ],

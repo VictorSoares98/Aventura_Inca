@@ -1026,6 +1026,13 @@ public static class GeradorColetaveisAutomatico
         }
 
         Undo.RegisterCreatedObjectUndo(inimigoObj, "Criar Inimigo Letal");
+
+        Transform containerInimigos = OrganizadorHierarquiaSortify.ObterOuCriarContainer("INIMIGOS");
+        if (containerInimigos != null)
+        {
+            inimigoObj.transform.SetParent(containerInimigos, true);
+        }
+
         return inimigoObj;
     }
 
@@ -1077,6 +1084,25 @@ public static class GeradorColetaveisAutomatico
         {
             instancia.transform.position = posicao;
             Undo.RegisterCreatedObjectUndo(instancia, "Instanciar Coletavel Amostra");
+
+            ItemColetavel itemCol = instancia.GetComponent<ItemColetavel>();
+            string subgrupo = null;
+            if (itemCol != null && itemCol.Item != null)
+            {
+                subgrupo = itemCol.Item.Tipo switch
+                {
+                    TipoItem.Moeda => "_MOEDAS",
+                    TipoItem.Reliquia => "_RELIQUIAS",
+                    TipoItem.Consumivel => "_POCOES",
+                    _ => null
+                };
+            }
+
+            Transform containerColetavel = OrganizadorHierarquiaSortify.ObterOuCriarContainer("COLETAVEIS", subgrupo);
+            if (containerColetavel != null)
+            {
+                instancia.transform.SetParent(containerColetavel, true);
+            }
         }
     }
 
