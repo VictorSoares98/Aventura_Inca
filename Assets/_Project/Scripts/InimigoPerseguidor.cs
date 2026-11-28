@@ -26,11 +26,15 @@ public class InimigoPerseguidor : MonoBehaviour
     [Tooltip("Tempo de espera ocioso inicial ao iniciar o jogo (permite ao jogador andar e se posicionar).")]
     [SerializeField] private float tempoEsperaInicial = 3.5f;
     [Tooltip("Tempo de preparação do ataque (windup) permitindo ao jogador ver o golpe e tentar desviar.")]
-    [SerializeField] private float tempoPreparoAtaque = 0.7f;
+    [SerializeField] private float tempoPreparoAtaque = 0.6f;
+    [Tooltip("Tempo de recuperação e finalização da animação do ataque antes de retornar a Idle.")]
+    [SerializeField] private float tempoRecuperacaoAtaque = 0.8f;
+    [Tooltip("Intervalo mínimo de descanso entre ataques consecutivos se o jogador sobreviver.")]
+    [SerializeField] private float intervaloEntreAtaques = 1.8f;
 
     [Header("Combate Letal")]
     [Tooltip("Distância máxima para aplicar o ataque fatal no jogador.")]
-    [SerializeField] private float distanciaAtaque = 2.2f;
+    [SerializeField] private float distanciaAtaque = 3.2f;
     [SerializeField] private float danoLetal = 9999f;
     [SerializeField] private bool matarInstantaneo = true;
 
@@ -49,15 +53,30 @@ public class InimigoPerseguidor : MonoBehaviour
     private bool preparandoAtaque;
     private float cronometroEspera;
     private float cronometroAtaque;
+    private float cronometroPosAtaque;
+    private float cronometroRecargaAtaque;
     private string animacaoAtual;
     private readonly RaycastHit[] hitsChao = new RaycastHit[8];
 
     private void Awake()
     {
         agente = GetComponent<NavMeshAgent>();
+        if (agente != null)
+        {
+            agente.radius = 1.0f;
+            agente.height = 2.0f;
+            agente.obstacleAvoidanceType = ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+            agente.avoidancePriority = 30 + (Mathf.Abs(GetInstanceID()) % 40);
+            agente.stoppingDistance = Mathf.Max(2.3f, distanciaAtaque * 0.75f);
+        }
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
+
+        if (animator != null)
+        {
+            animator.applyRootMotion = false;
+        }
 
         GarantirColisorTrigger();
         cronometroEspera = tempoEsperaInicial;
@@ -92,12 +111,18 @@ public class InimigoPerseguidor : MonoBehaviour
             CapsuleCollider cap = gameObject.AddComponent<CapsuleCollider>();
             cap.center = new Vector3(0f, 1f, 0f);
             cap.radius = 1.0f;
-            cap.height = 2.2f;
+            cap.height = 2.0f;
             cap.isTrigger = true;
         }
         else
         {
             col.isTrigger = true;
+            if (col is CapsuleCollider capCol)
+            {
+                capCol.center = new Vector3(0f, 1f, 0f);
+                capCol.radius = 1.0f;
+                capCol.height = 2.0f;
+            }
         }
     }
 
@@ -122,6 +147,8 @@ public class InimigoPerseguidor : MonoBehaviour
     {
         jaAtacou = false;
         preparandoAtaque = false;
+        cronometroPosAtaque = 0f;
+        cronometroRecargaAtaque = 0f;
         cronometroEspera = 2.5f; // Dá 2.5s de trégua ao renascer
         TocarAnimacao(animacaoIdle, 0.2f);
     }
@@ -134,14 +161,38 @@ public class InimigoPerseguidor : MonoBehaviour
             if (jogador == null) return;
         }
 
-        // Se já atacou ou o jogador morreu, para de perseguir
-        if (jaAtacou || (vidaJogador != null && vidaJogador.EstaMorto))
+        // Se o jogador já faleceu, cessa qualquer perseguição e mantém postura vitoriosa/idle
+        if (vidaJogador != null && vidaJogador.EstaMorto)
         {
             PararMovimento();
-            if (jaAtacou && !preparandoAtaque)
+            TocarAnimacao(animacaoIdle, 0.3f);
+            return;
+        }
+
+        // Atualiza temporizador de recarga entre investidas de ataque
+        if (cronometroRecargaAtaque > 0f)
+        {
+            cronometroRecargaAtaque -= Time.deltaTime;
+        }
+
+        // Conclusão e recuperação da animação do ataque pós-dano
+        if (cronometroPosAtaque > 0f)
+        {
+            cronometroPosAtaque -= Time.deltaTime;
+            PararMovimento();
+            EncararJogador();
+            if (cronometroPosAtaque <= 0f)
             {
-                TocarAnimacao(animacaoIdle, 0.3f);
+                TocarAnimacao(animacaoIdle, 0.25f);
             }
+            return;
+        }
+
+        // Se o golpe desferido já liquidou o alvo permanentemente
+        if (jaAtacou)
+        {
+            PararMovimento();
+            TocarAnimacao(animacaoIdle, 0.3f);
             return;
         }
 
@@ -156,7 +207,7 @@ public class InimigoPerseguidor : MonoBehaviour
 
         float distancia = Vector3.Distance(transform.position, jogador.position);
 
-        // Se está no meio do preparo do ataque fatal
+        // Se está no meio do preparo do ataque fatal (windup)
         if (preparandoAtaque)
         {
             PararMovimento();
@@ -166,30 +217,38 @@ public class InimigoPerseguidor : MonoBehaviour
             if (cronometroAtaque <= 0f)
             {
                 preparandoAtaque = false;
-                // Aplica o dano se o jogador não tiver fugido para longe
-                if (distancia <= distanciaAtaque + 1.0f)
+                // Aplica o dano se o jogador ainda estiver no alcance tático
+                if (distancia <= distanciaAtaque + 1.2f)
                 {
                     DesferirDanoFatal();
+                }
+                else
+                {
+                    // Jogador conseguiu recuar ou desviar a tempo
+                    cronometroRecargaAtaque = intervaloEntreAtaques;
+                    TocarAnimacao(animacaoIdle, 0.25f);
                 }
             }
             return;
         }
 
-        // Início do ataque fatal por proximidade física
-        if (distancia <= distanciaAtaque)
+        // Início do ataque por proximidade física com verificação de recarga
+        if (distancia <= distanciaAtaque && cronometroRecargaAtaque <= 0f)
         {
             IniciarPreparoAtaque();
             return;
         }
 
-        // Perseguição se estiver no raio de visão
+        // Perseguição e cerco ao jogador
         if (distancia <= distanciaPerseguicao)
         {
+            Vector3 destinoTatico = ObterDestinoTatico();
+
             if (agente != null && agente.isOnNavMesh)
             {
                 agente.isStopped = false;
                 agente.speed = distancia > distanciaCorrida ? velocidadeCorrida : velocidadeCaminhada;
-                agente.SetDestination(jogador.position);
+                agente.SetDestination(destinoTatico);
             }
             else
             {
@@ -206,8 +265,18 @@ public class InimigoPerseguidor : MonoBehaviour
                 AjustarAlturaAoSolo(instantaneo: false);
             }
 
-            // Alterna animações de corrida ou caminhada
-            if (distancia > distanciaCorrida)
+            // POLIMENTO CRÍTICO: Animação dirigida pela velocidade real da criatura
+            // Elimina o caminhar infinito no lugar (walk in place) quando bloqueado por aliados
+            float velocidadeReal = (agente != null && agente.isOnNavMesh)
+                ? agente.velocity.magnitude
+                : (distancia > distanciaCorrida ? velocidadeCorrida : velocidadeCaminhada);
+
+            if (velocidadeReal < 0.2f)
+            {
+                // Criatura obstruída por aliados, parada no destino ou esperando passagem
+                TocarAnimacao(animacaoIdle, 0.25f);
+            }
+            else if (velocidadeReal > (velocidadeCaminhada + 0.6f) || (distancia > distanciaCorrida && velocidadeReal > 1.0f))
             {
                 TocarAnimacao(animacaoCorrer, 0.2f);
             }
@@ -222,6 +291,39 @@ public class InimigoPerseguidor : MonoBehaviour
             PararMovimento();
             TocarAnimacao(animacaoIdle, 0.3f);
         }
+    }
+
+    /// <summary>
+    /// Distribui os múltiplos inimigos ao redor do jogador em ângulos de cerco (Pack Hunting),
+    /// impedindo aglomeração cega em fila indiana.
+    /// </summary>
+    private Vector3 ObterDestinoTatico()
+    {
+        if (jogador == null) return transform.position;
+
+        float dist = Vector3.Distance(transform.position, jogador.position);
+        if (dist > distanciaCorrida)
+        {
+            return jogador.position;
+        }
+
+        int id = Mathf.Abs(GetInstanceID());
+        float anguloOffset = ((id % 6) * 50f) - 125f;
+
+        Vector3 vetorRelativo = transform.position - jogador.position;
+        vetorRelativo.y = 0f;
+        if (vetorRelativo.sqrMagnitude < 0.01f) vetorRelativo = Vector3.forward;
+        vetorRelativo.Normalize();
+
+        Vector3 dirSlot = Quaternion.Euler(0f, anguloOffset * 0.45f, 0f) * vetorRelativo;
+        Vector3 posSlot = jogador.position + (dirSlot * (distanciaAtaque * 0.8f));
+
+        if (NavMesh.SamplePosition(posSlot, out NavMeshHit hit, 2.5f, NavMesh.AllAreas))
+        {
+            return hit.position;
+        }
+
+        return jogador.position;
     }
 
     private void IniciarPreparoAtaque()
@@ -250,16 +352,27 @@ public class InimigoPerseguidor : MonoBehaviour
 
     private void DesferirDanoFatal()
     {
-        if (jaAtacou) return;
-        jaAtacou = true;
-
+        cronometroPosAtaque = tempoRecuperacaoAtaque;
         PararMovimento();
         EncararJogador();
 
         if (vidaJogador != null)
         {
-            Debug.LogWarning("[InimigoPerseguidor] Ataque fatal desferido contra o jogador!");
+            Debug.LogWarning("[InimigoPerseguidor] Ataque desferido contra o jogador!");
             vidaJogador.ReceberDano(matarInstantaneo ? 9999f : danoLetal);
+
+            if (matarInstantaneo || vidaJogador.EstaMorto)
+            {
+                jaAtacou = true;
+            }
+            else
+            {
+                cronometroRecargaAtaque = intervaloEntreAtaques;
+            }
+        }
+        else
+        {
+            cronometroRecargaAtaque = intervaloEntreAtaques;
         }
     }
 
@@ -271,7 +384,8 @@ public class InimigoPerseguidor : MonoBehaviour
             dir.y = 0f;
             if (dir.sqrMagnitude > 0.001f)
             {
-                transform.rotation = Quaternion.LookRotation(dir);
+                Quaternion rotAlvo = Quaternion.LookRotation(dir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, rotAlvo, 12f * Time.deltaTime);
             }
         }
     }
