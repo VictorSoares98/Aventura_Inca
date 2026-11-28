@@ -67,7 +67,20 @@ public class InventarioUI : MonoBehaviour
             }
 
         if (EstaAberto)
-            Fechar();
+        {
+            if (gameObject.scene.isLoaded)
+            {
+                Fechar();
+            }
+            else
+            {
+                if (painel != null)
+                    painel.SetActive(false);
+
+                if (pausarJogo)
+                    Time.timeScale = escalaTempoAnterior;
+            }
+        }
     }
 
     private void GarantirComponentesBloqueados()

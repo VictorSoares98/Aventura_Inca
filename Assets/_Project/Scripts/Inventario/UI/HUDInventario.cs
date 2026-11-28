@@ -25,6 +25,7 @@ public class HUDInventario : MonoBehaviour
     private bool inscritoInventario;
     private bool inscritoObjetivo;
     private bool inscritoEventosGlobais;
+    private bool jogadorMorto;
 
     private void OnEnable()
     {
@@ -79,6 +80,8 @@ public class HUDInventario : MonoBehaviour
         {
             ItemColetavel.AoEntrarAlcance += MostrarAviso;
             ItemColetavel.AoSairAlcance += EsconderAviso;
+            PortalProximaFase.AoExibirMensagemPortal += MostrarMensagemPortal;
+            PortalProximaFase.AoOcultarMensagemPortal += EsconderMensagemPortal;
             VidaPersonagem.AoJogadorMorrer += ExibirMorte;
             VidaPersonagem.AoJogadorRenascer += EsconderMorte;
             inscritoEventosGlobais = true;
@@ -104,6 +107,8 @@ public class HUDInventario : MonoBehaviour
         {
             ItemColetavel.AoEntrarAlcance -= MostrarAviso;
             ItemColetavel.AoSairAlcance -= EsconderAviso;
+            PortalProximaFase.AoExibirMensagemPortal -= MostrarMensagemPortal;
+            PortalProximaFase.AoOcultarMensagemPortal -= EsconderMensagemPortal;
             VidaPersonagem.AoJogadorMorrer -= ExibirMorte;
             VidaPersonagem.AoJogadorRenascer -= EsconderMorte;
             inscritoEventosGlobais = false;
@@ -135,6 +140,9 @@ public class HUDInventario : MonoBehaviour
 
     private void MostrarAviso(ItemColetavel coletavel)
     {
+        if (jogadorMorto)
+            return;
+
         coletavelEmFoco = coletavel;
 
         if (textoAviso != null)
@@ -152,12 +160,39 @@ public class HUDInventario : MonoBehaviour
 
         coletavelEmFoco = null;
 
+        if (!jogadorMorto && painelAviso != null)
+            painelAviso.SetActive(false);
+    }
+
+    private void MostrarMensagemPortal(string mensagem)
+    {
+        if (jogadorMorto)
+            return;
+
+        if (textoAviso != null)
+            textoAviso.text = mensagem;
+
+        if (painelAviso != null)
+            painelAviso.SetActive(true);
+    }
+
+    private void EsconderMensagemPortal()
+    {
+        if (jogadorMorto || coletavelEmFoco != null)
+            return;
+
         if (painelAviso != null)
             painelAviso.SetActive(false);
+
+        if (textoAviso != null)
+            textoAviso.text = string.Empty;
     }
 
     private void ExibirMorte()
     {
+        jogadorMorto = true;
+        coletavelEmFoco = null;
+
         if (textoAviso != null)
             textoAviso.text = "<color=#FF3333><b>💀 VOCÊ FOI ELIMINADO!</b></color>\nPressione <b>[R]</b> para Renascer";
 
@@ -167,6 +202,8 @@ public class HUDInventario : MonoBehaviour
 
     private void EsconderMorte()
     {
+        jogadorMorto = false;
+
         if (painelAviso != null)
             painelAviso.SetActive(false);
 
