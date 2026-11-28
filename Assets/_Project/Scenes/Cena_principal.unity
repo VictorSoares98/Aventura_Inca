@@ -2731,6 +2731,7 @@ MonoBehaviour:
   velocidadeCorrida: 5
   tempoEsperaInicial: 3.5
   tempoPreparoAtaque: 0.7
+  tempoRecuperacaoAtaque: 0.8
   distanciaAtaque: 2.2
   danoLetal: 9999
   matarInstantaneo: 1
@@ -2919,6 +2920,7 @@ MonoBehaviour:
   velocidadeCorrida: 5
   tempoEsperaInicial: 3.5
   tempoPreparoAtaque: 0.7
+  tempoRecuperacaoAtaque: 0.8
   distanciaAtaque: 2.2
   danoLetal: 9999
   matarInstantaneo: 1
@@ -3417,6 +3419,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1109748784}
+  - {fileID: 1431398666}
   - {fileID: 1384704952}
   - {fileID: 543932313}
   - {fileID: 46029173}
@@ -5548,6 +5551,7 @@ MonoBehaviour:
   velocidadeCorrida: 5
   tempoEsperaInicial: 3.5
   tempoPreparoAtaque: 0.7
+  tempoRecuperacaoAtaque: 0.8
   distanciaAtaque: 2.2
   danoLetal: 9999
   matarInstantaneo: 1
@@ -6330,12 +6334,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1431398663}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 546, y: -2, z: 12}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 751466700}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1450016812
 PrefabInstance:
@@ -9002,7 +9006,6 @@ SceneRoots:
   - {fileID: 831986683}
   - {fileID: 1862359082}
   - {fileID: 751466700}
-  - {fileID: 1431398666}
   - {fileID: 1340761604}
   - {fileID: 1992759253}
   - {fileID: 469276292}

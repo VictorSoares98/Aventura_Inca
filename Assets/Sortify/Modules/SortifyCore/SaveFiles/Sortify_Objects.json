@@ -311,32 +311,64 @@
                     "colorValue": "40BF40FF"
                 },
                 {
-                    "objID": "Cena_principal_PLAYER_4",
+                    "objID": "Cena_principal_PLAYER_3",
                     "colorValue": "4CB5FFFF"
                 },
                 {
-                    "objID": "Cena_principal_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "008080FF"
                 },
                 {
-                    "objID": "Cena_principal_POSTE DE LUZ_1_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal_POSTE DE LUZ_1_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
                 },
                 {
-                    "objID": "Cena_principal__ESTRADA_2_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__ESTRADA_2_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
                 },
                 {
-                    "objID": "Cena_principal__QUEBRA MOLA_3_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__QUEBRA MOLA_3_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
                 },
                 {
-                    "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
                     "colorValue": "8000FFFF"
                 },
                 {
-                    "objID": "Cena_principal_HUD_5",
+                    "objID": "Cena_principal_HUD_4",
                     "colorValue": "BF4040FF"
+                },
+                {
+                    "objID": "Cena_principal_COLETAVEIS_5",
+                    "colorValue": "E6A817FF"
+                },
+                {
+                    "objID": "Cena_principal_INIMIGOS_6",
+                    "colorValue": "D93838FF"
+                },
+                {
+                    "objID": "Cena_principal_ARMADILHAS_7",
+                    "colorValue": "E66C2CFF"
+                },
+                {
+                    "objID": "Cena_principal_SISTEMAS_8",
+                    "colorValue": "6B7A8FFF"
+                },
+                {
+                    "objID": "Cena_principal_AUDIO_9",
+                    "colorValue": "2FA89BFF"
+                },
+                {
+                    "objID": "Cena_principal__MOEDAS_0_COLETAVEIS_5",
+                    "colorValue": "FFD700FF"
+                },
+                {
+                    "objID": "Cena_principal__RELIQUIAS_1_COLETAVEIS_5",
+                    "colorValue": "C978FFFF"
+                },
+                {
+                    "objID": "Cena_principal__POCOES_2_COLETAVEIS_5",
+                    "colorValue": "E64553FF"
                 },
                 {
                     "objID": "Cena_principal__GRADE_4_CONTEUDO TERRENO_2_TERRENO_2",
@@ -358,27 +390,59 @@
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal_PLAYER_4",
+                    "objID": "Cena_principal_PLAYER_3",
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal_CONTEUDO TERRENO_2_TERRENO_2",
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal_POSTE DE LUZ_1_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal_POSTE DE LUZ_1_CONTEUDO TERRENO_2_TERRENO_2",
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal__ESTRADA_2_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__ESTRADA_2_CONTEUDO TERRENO_2_TERRENO_2",
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal__QUEBRA MOLA_3_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__QUEBRA MOLA_3_CONTEUDO TERRENO_2_TERRENO_2",
                     "show": false
                 },
                 {
-                    "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_1_TERRENO_2",
+                    "objID": "Cena_principal__CONE_0_CONTEUDO TERRENO_2_TERRENO_2",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_INIMIGOS_6",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_ARMADILHAS_7",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_SISTEMAS_8",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal_AUDIO_9",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal__MOEDAS_0_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal__RELIQUIAS_1_COLETAVEIS_5",
+                    "show": false
+                },
+                {
+                    "objID": "Cena_principal__POCOES_2_COLETAVEIS_5",
                     "show": false
                 },
                 {
