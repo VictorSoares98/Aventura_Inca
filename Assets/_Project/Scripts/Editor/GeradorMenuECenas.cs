@@ -520,8 +520,9 @@ public static class GeradorMenuECenas
         surface.collectObjects = CollectObjects.All;
         surface.BuildNavMesh();
 
+        List<GameObject> hudObjs = hudObj != null ? new List<GameObject> { hudObj } : null;
         List<GameObject> sistemas = new List<GameObject> { objFase, portalObj };
-        OrganizarCenaComSortify(cena, camObj, luz != null ? luz.gameObject : null, terrenoRaiz, jogadorObj, hudObj, coletaveis, inimigos, armadilhas, sistemas, bgmObj);
+        OrganizarCenaComSortify(cena, camObj, luz != null ? luz.gameObject : null, terrenoRaiz, jogadorObj, hudObjs, coletaveis, inimigos, armadilhas, sistemas, bgmObj);
 
         EditorSceneManager.SaveScene(cena, PathCenaFase2);
     }
