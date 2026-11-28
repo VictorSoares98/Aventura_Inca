@@ -23,6 +23,8 @@ public class ControleJogador : MonoBehaviour
     [Header("Áudio dos Passos")]
     [SerializeField] private AudioSource passosAudioSource;
     [SerializeField] private AudioClip[] passosAudioClips;
+    [SerializeField, Range(0f, 1f)] private float volumePassos = 0.85f;
+    [SerializeField, Min(0.15f)] private float intervaloPassoCaminhada = 0.46f;
 
     [Header("Movimento")]
     [SerializeField] private float velocidade = 3.0f;
@@ -46,6 +48,7 @@ public class ControleJogador : MonoBehaviour
     private float velocidadeAtual;
     private float velocidadeY;
     private bool estaNoChao;
+    private float cronometroPassoFallback;
 
     private void Awake()
     {
@@ -55,6 +58,15 @@ public class ControleJogador : MonoBehaviour
         if (transformCamera == null && Camera.main != null)
         {
             transformCamera = Camera.main.transform;
+        }
+
+        // Garante um AudioSource próprio de efeito (2D, sem loop) para não conflitar com a música de fundo
+        if (passosAudioSource == null || passosAudioSource.loop)
+        {
+            passosAudioSource = gameObject.AddComponent<AudioSource>();
+            passosAudioSource.playOnAwake = false;
+            passosAudioSource.loop = false;
+            passosAudioSource.spatialBlend = 0f;
         }
 
         Cursor.lockState = CursorLockMode.Locked;
@@ -212,6 +224,21 @@ public class ControleJogador : MonoBehaviour
         // Atualiza estado do chão
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
+
+        // Fallback para clipes de caminhada sem Animation Event 'Passos'
+        if (estaNoChao && velocidadeAtual > 0.35f && !correndo)
+        {
+            cronometroPassoFallback -= Time.deltaTime;
+            if (cronometroPassoFallback <= 0f)
+            {
+                Passos();
+                cronometroPassoFallback = intervaloPassoCaminhada;
+            }
+        }
+        else
+        {
+            cronometroPassoFallback = 0.12f;
+        }
     }
 
     // Áudio dos passos
@@ -219,6 +246,8 @@ public class ControleJogador : MonoBehaviour
     {
         if (!estaNoChao || velocidadeAtual < 0.2f)
             return;
+
+        cronometroPassoFallback = intervaloPassoCaminhada;
 
         if (passosAudioSource != null &&
             passosAudioClips != null &&
@@ -230,7 +259,8 @@ public class ControleJogador : MonoBehaviour
 
             if (clip != null)
             {
-                passosAudioSource.PlayOneShot(clip);
+                passosAudioSource.pitch = Random.Range(0.93f, 1.07f);
+                passosAudioSource.PlayOneShot(clip, volumePassos);
             }
         }
     }

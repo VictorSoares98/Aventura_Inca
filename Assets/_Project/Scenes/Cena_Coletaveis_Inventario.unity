@@ -849,10 +849,10 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: a62ba907f7c68a746a1c6c13c6d06ef7, type: 3}
+  m_Resource: {fileID: 8300000, guid: a62ba907f7c68a746a1c6c13c6d06ef7, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.35
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -2743,9 +2743,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03da8569288be05439c281c3964b0fc8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ControleJogador
-  passosAudioSource: {fileID: 141013414}
+  passosAudioSource: {fileID: 0}
   passosAudioClips:
-  - {fileID: 8300000, guid: 620cc173734a77040a02edea8046c28d, type: 3}
+  - {fileID: 8300000, guid: 7af50b8dec5e711439dc1ad4f03cac0e, type: 3}
+  - {fileID: 8300000, guid: cc1c17f748f63544a96088dc0264cf52, type: 3}
+  - {fileID: 8300000, guid: bda40fa9fe711bc479ed57860a9caaa7, type: 3}
+  - {fileID: 8300000, guid: 2fe3cbb23b5d6bc45924cf95c7dd9dcb, type: 3}
+  - {fileID: 8300000, guid: 7a64fcaf08a3d9c499e7d7f9b1116634, type: 3}
+  volumePassos: 0.85
   velocidade: 3
   velocidadeRotacao: 15
   aceleracao: 10
@@ -2822,6 +2827,11 @@ MonoBehaviour:
   vidaMaxima: 100
   vidaAtual: 100
   barraVida: {fileID: 1529088994}
+  textoVida: {fileID: 0}
+  somDano: {fileID: 8300000, guid: e0f5045a449d4fd99771f90121a01703, type: 3}
+  somCura: {fileID: 8300000, guid: 13885b10cb644af6b54bfd60ecf90f3b, type: 3}
+  somMorte: {fileID: 8300000, guid: 83592cda41b5405b8fba8a282c3c3e31, type: 3}
+  volumeAudio: 0.85
 --- !u!54 &410827845
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -3700,6 +3710,8 @@ MonoBehaviour:
   distanciaAtaque: 2.2
   danoLetal: 9999
   matarInstantaneo: 1
+  somAtaque: {fileID: 8300000, guid: f43848b8bf86470fbe726bb4ad5ac32b, type: 3}
+  volumeAtaque: 0.9
 --- !u!195 &627305971
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -7966,6 +7978,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Armadilha
   dano: 20
   destruirAoTocar: 1
+  somAtivacao: {fileID: 8300000, guid: e0f5045a449d4fd99771f90121a01703, type: 3}
+  volumeSom: 0.85
 --- !u!65 &1369012981
 BoxCollider:
   m_ObjectHideFlags: 0

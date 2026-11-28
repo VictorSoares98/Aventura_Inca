@@ -34,6 +34,10 @@ public class InimigoPerseguidor : MonoBehaviour
     [SerializeField] private float danoLetal = 9999f;
     [SerializeField] private bool matarInstantaneo = true;
 
+    [Header("Áudio")]
+    [SerializeField] private AudioClip somAtaque;
+    [SerializeField, Range(0f, 1f)] private float volumeAtaque = 0.9f;
+
     private NavMeshAgent agente;
     private bool jaAtacou;
     private bool preparandoAtaque;
@@ -214,6 +218,12 @@ public class InimigoPerseguidor : MonoBehaviour
 
         PararMovimento();
         EncararJogador();
+
+        if (somAtaque != null)
+        {
+            Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+            AudioSource.PlayClipAtPoint(somAtaque, posAudio, volumeAtaque);
+        }
 
         // Dispara uma das animações de ataque reais da besta (Attack1, Attack2, Attack3)
         if (animacoesAtaque != null && animacoesAtaque.Length > 0)

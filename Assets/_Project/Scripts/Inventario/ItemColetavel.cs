@@ -33,6 +33,7 @@ public class ItemColetavel : MonoBehaviour
 
     [Header("Feedback (opcional)")]
     [SerializeField] private AudioClip somColeta;
+    [SerializeField, Range(0f, 1f)] private float volumeSomColeta = 0.9f;
     [SerializeField] private GameObject efeitoColeta;
 
     /// <summary>Raised when the player enters the range of a key-based collectible.</summary>
@@ -174,7 +175,10 @@ public class ItemColetavel : MonoBehaviour
         coletado = true;
 
         if (somColeta != null)
-            AudioSource.PlayClipAtPoint(somColeta, transform.position);
+        {
+            Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+            AudioSource.PlayClipAtPoint(somColeta, posAudio, volumeSomColeta);
+        }
 
         if (efeitoColeta != null)
             Instantiate(efeitoColeta, transform.position, Quaternion.identity);

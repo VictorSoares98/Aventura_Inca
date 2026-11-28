@@ -13,6 +13,12 @@ public class VidaPersonagem : MonoBehaviour
     [SerializeField] private Image barraVida;
     [SerializeField] private TextMeshProUGUI textoVida;
 
+    [Header("Áudio")]
+    [SerializeField] private AudioClip somDano;
+    [SerializeField] private AudioClip somCura;
+    [SerializeField] private AudioClip somMorte;
+    [SerializeField, Range(0f, 1f)] private float volumeAudio = 0.85f;
+
     private bool estaMorto;
 
     public bool EstaMorto => estaMorto;
@@ -55,6 +61,10 @@ public class VidaPersonagem : MonoBehaviour
         {
             Morrer();
         }
+        else
+        {
+            TocarSom(somDano);
+        }
     }
 
     public void RecuperarVida(float quantidade)
@@ -69,6 +79,16 @@ public class VidaPersonagem : MonoBehaviour
         );
 
         AtualizarHUD();
+        TocarSom(somCura);
+    }
+
+    private void TocarSom(AudioClip clip)
+    {
+        if (clip == null)
+            return;
+
+        Vector3 posAudio = Camera.main != null ? Camera.main.transform.position : transform.position;
+        AudioSource.PlayClipAtPoint(clip, posAudio, volumeAudio);
     }
 
     private void AtualizarHUD()
@@ -87,6 +107,7 @@ public class VidaPersonagem : MonoBehaviour
     private void Morrer()
     {
         estaMorto = true;
+        TocarSom(somMorte);
 
         Debug.LogWarning("[VidaPersonagem] O personagem morreu! Pressione [R] para renascer com vida cheia.");
 

@@ -1013,6 +1013,18 @@ public static class GeradorColetaveisAutomatico
         InimigoPerseguidor seguidor = inimigoObj.GetComponent<InimigoPerseguidor>();
         if (seguidor == null) seguidor = inimigoObj.AddComponent<InimigoPerseguidor>();
 
+        AudioClip somAtaqueInimigo = AssetDatabase.LoadAssetAtPath<AudioClip>("Assets/_Project/Audio/SFX/SFX_Ataque_Inimigo.wav");
+        if (somAtaqueInimigo != null)
+        {
+            SerializedObject soSeguidor = new SerializedObject(seguidor);
+            SerializedProperty propSom = soSeguidor.FindProperty("somAtaque");
+            if (propSom != null)
+            {
+                propSom.objectReferenceValue = somAtaqueInimigo;
+                soSeguidor.ApplyModifiedProperties();
+            }
+        }
+
         Undo.RegisterCreatedObjectUndo(inimigoObj, "Criar Inimigo Letal");
         return inimigoObj;
     }
@@ -1079,6 +1091,27 @@ public static class GeradorColetaveisAutomatico
         so.FindProperty("velocidadeGiro").floatValue = 90f;
         so.FindProperty("amplitudeFlutuacao").floatValue = 0.15f;
         so.FindProperty("frequenciaFlutuacao").floatValue = 1.5f;
+
+        if (item != null)
+        {
+            string caminhoSfx = item.Tipo switch
+            {
+                TipoItem.Moeda => "Assets/_Project/Audio/SFX/SFX_Coleta_Moeda.wav",
+                TipoItem.Reliquia => "Assets/_Project/Audio/SFX/SFX_Coleta_Reliquia.wav",
+                TipoItem.Consumivel => "Assets/_Project/Audio/SFX/SFX_Coleta_Pocao.wav",
+                _ => null
+            };
+
+            if (!string.IsNullOrEmpty(caminhoSfx))
+            {
+                AudioClip clipSfx = AssetDatabase.LoadAssetAtPath<AudioClip>(caminhoSfx);
+                if (clipSfx != null)
+                {
+                    so.FindProperty("somColeta").objectReferenceValue = clipSfx;
+                }
+            }
+        }
+
         so.ApplyModifiedProperties();
     }
 

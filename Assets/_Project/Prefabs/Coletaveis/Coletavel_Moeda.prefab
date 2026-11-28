@@ -137,5 +137,6 @@ MonoBehaviour:
   frequenciaFlutuacao: 1.5
   autoAjustarAoSolo: 1
   alturaAcimaDoSolo: 0.85
-  somColeta: {fileID: 0}
+  somColeta: {fileID: 8300000, guid: 7fdde65941cb4bfabb992356db72a8e5, type: 3}
+  volumeSomColeta: 0.9
   efeitoColeta: {fileID: 0}

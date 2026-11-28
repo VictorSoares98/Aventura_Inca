@@ -169,7 +169,8 @@ MonoBehaviour:
   frequenciaFlutuacao: 1.5
   autoAjustarAoSolo: 1
   alturaAcimaDoSolo: 0.85
-  somColeta: {fileID: 0}
+  somColeta: {fileID: 8300000, guid: ee045e8da18846ceb66c9073e451abcb, type: 3}
+  volumeSomColeta: 0.9
   efeitoColeta: {fileID: 0}
 --- !u!1 &6056630592232090897
 GameObject:
