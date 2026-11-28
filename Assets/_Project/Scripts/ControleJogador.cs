@@ -235,10 +235,10 @@ public class ControleJogador : MonoBehaviour
         estaNoChao = character.isGrounded;
         animator.SetBool(noChaoHash, estaNoChao);
 
-            if (!estavaNoChao && estaNoChao && velocidadeYAnterior <= -3.0f)
-            {
-                TocarPasso(volumeAterrissagem, Random.Range(0.84f, 0.90f));
-            }
+        if (!estavaNoChao && estaNoChao && velocidadeYAnterior <= -3.0f)
+        {
+            TocarPasso(volumeAterrissagem, Random.Range(0.84f, 0.90f));
+        }
     }
 
     // Áudio dos passos chamado pelos Animation Events dos clipes de caminhada e corrida
@@ -251,14 +251,14 @@ public class ControleJogador : MonoBehaviour
         if (evt != null && evt.animatorClipInfo.weight < pesoMinimoAnimacaoPasso)
             return;
 
-            float cooldown = estaCorrendo ? cooldownPassoCorrida : cooldownPassoCaminhada;
-            if (Time.time - ultimoTempoPasso < cooldown)
-                return;
+        float cooldown = estaCorrendo ? cooldownPassoCorrida : cooldownPassoCaminhada;
+        if (Time.time - ultimoTempoPasso < cooldown)
+            return;
 
-            float volume = estaCorrendo ? volumePassosCorrida : volumePassos;
-            float pitch = estaCorrendo ? Random.Range(1.00f, 1.10f) : Random.Range(0.94f, 1.04f);
-            TocarPasso(volume, pitch);
-        }
+        float volume = estaCorrendo ? volumePassosCorrida : volumePassos;
+        float pitch = estaCorrendo ? Random.Range(1.00f, 1.10f) : Random.Range(0.94f, 1.04f);
+        TocarPasso(volume, pitch);
+    }
 
     private void TocarPasso(float volume, float pitch)
     {
