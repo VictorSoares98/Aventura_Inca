@@ -444,7 +444,8 @@ public static class GeradorMenuECenas
 
         Canvas canvas = canvasObj.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 50;
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 100;
 
         CanvasScaler scaler = canvasObj.GetComponent<CanvasScaler>();
         scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
@@ -822,7 +823,8 @@ public static class GeradorMenuECenas
         if (ehFase3 && UnityEngine.Object.FindFirstObjectByType<TelaVitoriaUI>() == null)
         {
             GameObject vitoriaObj = InstanciarPrefabSeExistir(PathPrefabVitoria, Vector3.zero, "Prefab_TelaVitoria");
-            ParentearSeNaoNulo(vitoriaObj, raiz["HUD"]);
+            if (vitoriaObj != null)
+                vitoriaObj.transform.SetParent(null, false);
         }
     }
 

@@ -230,7 +230,22 @@ public class PortalProximaFase : MonoBehaviour
         if (ehFinalDoJogo)
         {
             Debug.Log("[PortalProximaFase] Portal final alcançado! Disparando conclusão do jogo.");
-            AoConcluirJogo?.Invoke();
+            if (AoConcluirJogo != null)
+            {
+                AoConcluirJogo.Invoke();
+                yield break;
+            }
+
+            Debug.LogWarning("[PortalProximaFase] Nenhum TelaVitoriaUI inscrito em AoConcluirJogo; retornando ao Menu Principal.");
+            AoExibirMensagemPortal?.Invoke("Fase final concluída! Retornando ao Menu Principal...");
+            yield return new WaitForSecondsRealtime(1.5f);
+
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+            Time.timeScale = 1f;
+
+            if (Application.CanStreamedLevelBeLoaded("Cena_MenuPrincipal"))
+                SceneManager.LoadScene("Cena_MenuPrincipal");
             yield break;
         }
 

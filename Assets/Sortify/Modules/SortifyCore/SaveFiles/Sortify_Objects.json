@@ -345,12 +345,6 @@
             "sceneName": ""
         },
         {
-            "colors": [],
-            "styles": [],
-            "showComponents": [],
-            "sceneName": "Cena_Teste_Inimigo"
-        },
-        {
             "colors": [
                 {
                     "objID": "Cena_MenuPrincipal_CAMERA_0",
@@ -457,6 +451,12 @@
                 }
             ],
             "sceneName": "Cena_MenuPrincipal"
+        },
+        {
+            "colors": [],
+            "styles": [],
+            "showComponents": [],
+            "sceneName": "Cena_Teste_Inimigo"
         }
     ]
 }
