@@ -190,9 +190,6 @@ public static class GeradorMenuECenas
         }
 
         Scene cena = EditorSceneManager.OpenScene(PathCenaFase1, OpenSceneMode.Single);
-        Terrain terreno = Terrain.activeTerrain;
-        Vector3 tSize = (terreno != null && terreno.terrainData != null) ? terreno.terrainData.size : new Vector3(120f, 10f, 120f);
-        float margem = Mathf.Min(18f, Mathf.Min(tSize.x, tSize.z) * 0.12f);
 
         GameObject jogadorObj = LocalizarOuInstanciarJogador();
         Vector3 frente = jogadorObj != null ? jogadorObj.transform.forward : Vector3.forward;
@@ -202,7 +199,9 @@ public static class GeradorMenuECenas
         frente.Normalize();
 
         Vector3 origemPos = jogadorObj != null ? jogadorObj.transform.position : Vector3.zero;
-        Vector3 posPortal = PontoNoTerreno(terreno, origemPos + frente * 22f, margem, 0f);
+        Vector3 posAlvo = origemPos + frente * 18f;
+        posAlvo.y = ObterAlturaSoloSemClamp(posAlvo, origemPos.y);
+        Vector3 posPortal = posAlvo;
 
         Dictionary<string, Transform> raiz = CriarEstruturaRaiz(cena);
 
@@ -256,10 +255,38 @@ public static class GeradorMenuECenas
         EditorUtility.DisplayDialog(
             "Fase 1 e Farol Atualizados!",
             "✔ Prefab_PortalProximaFase atualizado com feixe vertical de 45m (visível em todas as fases)\n" +
-            "✔ Portal_Para_Fase2 posicionado a 22m à frente do jogador na Cena_principal.unity\n" +
+            "✔ Portal_Para_Fase2 posicionado a 18m à frente do jogador na Cena_principal.unity\n" +
             $"✔ {registradas}/4 cenas registradas no EditorBuildSettings\n\n" +
             "Agora dê PLAY na Cena_MenuPrincipal e clique em JOGAR para testar!",
             "Excelente!");
+    }
+
+    private static float ObterAlturaSoloSemClamp(Vector3 posAlvo, float yFallback)
+    {
+        Terrain[] terrenos = Terrain.activeTerrains;
+        if (terrenos != null)
+        {
+            for (int i = 0; i < terrenos.Length; i++)
+            {
+                Terrain t = terrenos[i];
+                if (t == null || !t.gameObject.activeInHierarchy || t.terrainData == null)
+                    continue;
+
+                Vector3 tPos = t.transform.position;
+                Vector3 tSize = t.terrainData.size;
+                if (posAlvo.x >= tPos.x && posAlvo.x <= tPos.x + tSize.x &&
+                    posAlvo.z >= tPos.z && posAlvo.z <= tPos.z + tSize.z)
+                {
+                    return t.SampleHeight(posAlvo) + tPos.y;
+                }
+            }
+        }
+
+        Vector3 origemRay = new Vector3(posAlvo.x, yFallback + 30f, posAlvo.z);
+        if (Physics.Raycast(origemRay, Vector3.down, out RaycastHit hit, 80f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            return hit.point.y;
+
+        return yFallback;
     }
 
     private static void GerarPrefabsDeFaseInterno(bool exibirDialogo)
