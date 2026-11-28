@@ -38,12 +38,19 @@ public class InimigoPerseguidor : MonoBehaviour
     [SerializeField] private AudioClip somAtaque;
     [SerializeField, Range(0f, 1f)] private float volumeAtaque = 0.9f;
 
+    [Header("Aderência ao Solo (Fallback sem NavMesh)")]
+    [SerializeField] private float offsetAlturaSolo = 0f;
+    [SerializeField] private float alturaOrigemRaycast = 5f;
+    [SerializeField] private float distanciaRaycastSolo = 20f;
+    [SerializeField] private float velocidadeAjusteSolo = 15f;
+
     private NavMeshAgent agente;
     private bool jaAtacou;
     private bool preparandoAtaque;
     private float cronometroEspera;
     private float cronometroAtaque;
     private string animacaoAtual;
+    private readonly RaycastHit[] hitsChao = new RaycastHit[8];
 
     private void Awake()
     {
@@ -70,6 +77,11 @@ public class InimigoPerseguidor : MonoBehaviour
     {
         LocalizarJogadorSeNecessario();
         TocarAnimacao(animacaoIdle, 0.1f);
+
+        if (agente == null || !agente.isOnNavMesh)
+        {
+            AjustarAlturaAoSolo(instantaneo: true);
+        }
     }
 
     private void GarantirColisorTrigger()
@@ -181,14 +193,17 @@ public class InimigoPerseguidor : MonoBehaviour
             }
             else
             {
-                // Fallback sem NavMesh: move o transform diretamente
-                Vector3 direcao = (jogador.position - transform.position).normalized;
+                // Fallback sem NavMesh: move o transform diretamente e acompanha o relevo do solo
+                Vector3 direcao = jogador.position - transform.position;
                 direcao.y = 0f;
                 if (direcao.sqrMagnitude > 0.001f)
                 {
+                    direcao.Normalize();
                     transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direcao), 6f * Time.deltaTime);
                     transform.position += direcao * (distancia > distanciaCorrida ? velocidadeCorrida : velocidadeCaminhada) * Time.deltaTime;
                 }
+
+                AjustarAlturaAoSolo(instantaneo: false);
             }
 
             // Alterna animações de corrida ou caminhada
@@ -301,5 +316,58 @@ public class InimigoPerseguidor : MonoBehaviour
             animacaoAtual = nomeAnimacao;
             animator.CrossFadeInFixedTime(nomeAnimacao, tempoTransicao);
         }
+    }
+
+    private void AjustarAlturaAoSolo(bool instantaneo)
+    {
+        Vector3 pos = transform.position;
+        Vector3 origem = new Vector3(pos.x, pos.y + alturaOrigemRaycast, pos.z);
+        int mascara = ~LayerMask.GetMask("Ignore Raycast");
+
+        int totalHits = Physics.RaycastNonAlloc(
+            origem,
+            Vector3.down,
+            hitsChao,
+            distanciaRaycastSolo,
+            mascara,
+            QueryTriggerInteraction.Ignore
+        );
+
+        bool encontrouChao = false;
+        float menorDistancia = float.MaxValue;
+        float yChao = pos.y;
+
+        for (int i = 0; i < totalHits; i++)
+        {
+            Collider col = hitsChao[i].collider;
+            if (col == null || col.transform.IsChildOf(transform))
+                continue;
+
+            if (jogador != null && col.transform.IsChildOf(jogador))
+                continue;
+
+            if (hitsChao[i].distance < menorDistancia)
+            {
+                menorDistancia = hitsChao[i].distance;
+                yChao = hitsChao[i].point.y;
+                encontrouChao = true;
+            }
+        }
+
+        if (!encontrouChao && Terrain.activeTerrain != null)
+        {
+            yChao = Terrain.activeTerrain.SampleHeight(pos) + Terrain.activeTerrain.transform.position.y;
+            encontrouChao = true;
+        }
+
+        if (!encontrouChao)
+            return;
+
+        float yAlvo = yChao + offsetAlturaSolo;
+        pos.y = instantaneo
+            ? yAlvo
+            : Mathf.Lerp(pos.y, yAlvo, velocidadeAjusteSolo * Time.deltaTime);
+
+        transform.position = pos;
     }
 }
